@@ -19,14 +19,33 @@ class MockAuthServiceImpl: AuthService {
         val passwordHash: String
     )
 
-    private val mockDatabase = ConcurrentHashMap<String, MockUserEntity>()
+    private data class MockSessionEntity(
+        val id: UUID,
+        val userId: UUID,
+        val token: String,
+        val expiresAt: OffsetDateTime
+    )
+
+    private val mockUserDb = ConcurrentHashMap<String, MockUserEntity>()
+    private val mockSessionDb = ConcurrentHashMap<String, MockSessionEntity>()
 
     override fun login(request: LoginRequest): AuthResponse {
-        val entity = mockDatabase[request.email] ?: throw RuntimeException("User not found")
+        val entity = mockUserDb[request.email] ?: throw RuntimeException("User not found")
 
         if (entity.passwordHash != request.password) {
             throw RuntimeException("Invalid credentials")
         }
+
+        val tokenString = UUID.randomUUID().toString()
+        val expirationTime = OffsetDateTime.now().plusHours(1)
+
+        val newSession = MockSessionEntity(
+            id = UUID.randomUUID(),
+            userId = entity.profile.id,
+            token = tokenString,
+            expiresAt = expirationTime
+        )
+        mockSessionDb[tokenString] = newSession
 
         return AuthResponse(
             token = "mock.jwt.token.${UUID.randomUUID()}",
@@ -36,7 +55,7 @@ class MockAuthServiceImpl: AuthService {
     }
 
     override fun register(request: RegisterRequest): UserResponse {
-        if (mockDatabase.containsKey(request.email)) {
+        if (mockUserDb.containsKey(request.email)) {
             throw RuntimeException("User already registered")
         }
 
@@ -54,8 +73,23 @@ class MockAuthServiceImpl: AuthService {
             passwordHash = request.password
         )
 
-        mockDatabase[request.email] = newEntity
+        mockUserDb[request.email] = newEntity
         return newUser
+    }
+
+    override fun logout(token: String) {
+        mockSessionDb.remove(token)
+    }
+
+    override fun validateSession(token: String): UserResponse? {
+        val session = mockSessionDb[token] ?: return null
+
+        if (session.expiresAt.isBefore(OffsetDateTime.now())) {
+            mockSessionDb.remove(token)
+            return null
+        }
+
+        return mockUserDb.values.firstOrNull { it.profile.id == session.userId }?.profile
     }
 
 }
