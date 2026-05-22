@@ -1,0 +1,1972 @@
+openapi: 3.0.3
+
+info:
+  title: Student Report System API
+  description: |
+    REST API for the Student Report System.  
+    Built with **Spring Boot + Kotlin**.
+
+    ## Authentication
+    All protected endpoints require a **Bearer token** obtained from `POST /auth/login`.  
+    Include it as:  `Authorization: Bearer <token>`
+
+    ## Roles
+    | Role  | Description                        |
+    |-------|------------------------------------|
+    | User  | Student — can submit & manage own reports |
+    | Admin | Staff  — full access to all resources |
+
+  version: 1.1.0
+  contact:
+    name: Student Report Team
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Development
+  - url: https://api.studentreport.example.com/api/v1
+    description: Production
+
+tags:
+  - name: Auth
+    description: Registration, login and session management
+  - name: Users
+    description: User profile and account management
+  - name: Reports
+    description: Student damage / issue reports
+  - name: Images
+    description: Images attached to a report
+  - name: Buildings
+    description: Campus building master data
+  - name: Rooms
+    description: Rooms inside buildings
+  - name: Categories
+    description: Report category master data
+  - name: Upvotes
+    description: Upvote / un-upvote a report
+  - name: Report Log
+    description: Status-change audit trail for reports
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY SCHEME
+# ─────────────────────────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REUSABLE SCHEMAS
+# ─────────────────────────────────────────────────────────────────────────────
+  schemas:
+
+    # ── Enums ─────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum: [Admin, User]
+      example: User
+
+    ReportStatus:
+      type: string
+      enum: [Pending, In_Progress, Completed, Rejected]
+      example: Pending
+
+    # ── Wrappers ──────────────────────────────────────────────
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          nullable: true
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        size:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 10
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Resource not found
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    # ── Auth ──────────────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Muhammad Guntur Ricky Adhitya
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: 241017310003@mhs.ulm.ac.id
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: P@ssw0rd!
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: 241017310003@mhs.ulm.ac.id
+        password:
+          type: string
+          format: password
+          example: P@ssw0rd!
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2026-06-01T12:00:00Z"
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    # ── User ──────────────────────────────────────────────────
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Muhammad Guntur Ricky Adhitya
+        email:
+          type: string
+          format: email
+          example: 241017310003@mhs.ulm.ac.id
+        role:
+          $ref: '#/components/schemas/UserRole'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserStatsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        reportCount:
+          type: integer
+          example: 10
+        pendingReport:
+          type: integer
+          example: 3
+        completedReport:
+          type: integer
+          example: 5
+        rejectedReport:
+          type: integer
+          example: 2
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Muhammad Guntur Ricky Adhitya Baru
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: 241017310003.baru@mhs.ulm.ac.id
+
+    ChangePasswordRequest:
+      type: object
+      required: [oldPassword, newPassword]
+      properties:
+        oldPassword:
+          type: string
+          format: password
+          example: P@ssw0rd!
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+          example: N3wP@ss!
+
+    # ── Building ──────────────────────────────────────────────
+    BuildingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Gedung Fakultas Teknik Banjarmasin
+        code:
+          type: string
+          example: GFTBJM
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateBuildingRequest:
+      type: object
+      required: [name, code]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Gedung Fakultas Teknik Banjarmasin
+        code:
+          type: string
+          maxLength: 255
+          example: GFTBJM
+
+    UpdateBuildingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Gedung Fakultas Teknik Banjarmasin Revisi
+        code:
+          type: string
+          maxLength: 255
+          example: GFTBJMV2
+
+    # ── Room ──────────────────────────────────────────────────
+    RoomResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        buildingId:
+          type: string
+          format: uuid
+        building:
+          $ref: '#/components/schemas/BuildingResponse'
+        name:
+          type: string
+          example: Ruang Kuliah A14
+        floor:
+          type: integer
+          example: 1
+        code:
+          type: string
+          description: Unique room code across all buildings.
+          example: R-A14
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateRoomRequest:
+      type: object
+      required: [buildingId, name, floor, code]
+      properties:
+        buildingId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 255
+          example: Ruang Kuliah A14
+        floor:
+          type: integer
+          example: 1
+        code:
+          type: string
+          maxLength: 255
+          description: Must be unique across all rooms. Returns `409` if already taken.
+          example: RK-A14
+
+    UpdateRoomRequest:
+      type: object
+      properties:
+        buildingId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 255
+        floor:
+          type: integer
+        code:
+          type: string
+          maxLength: 255
+          description: Must be unique across all rooms. Returns `409` if already taken.
+
+    # ── Category ──────────────────────────────────────────────
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Kerusakan Fasilitas
+        description:
+          type: string
+          example: Laporan terkait kerusakan fasilitas kampus
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateCategoryRequest:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Kerusakan Fasilitas
+        description:
+          type: string
+          example: Laporan terkait kerusakan fasilitas kampus
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+
+    # ── Report ────────────────────────────────────────────────
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reporter:
+          $ref: '#/components/schemas/UserResponse'
+        category:
+          $ref: '#/components/schemas/CategoryResponse'
+        room:
+          $ref: '#/components/schemas/RoomResponse'
+        title:
+          type: string
+          example: AC Rusak di Ruang A14
+        description:
+          type: string
+          nullable: true
+          example: AC tidak berfungsi sejak kemarin pagi
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+        upvoteCount:
+          type: integer
+          example: 5
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportImageResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Null when the report has not been soft-deleted.
+
+    CreateReportRequest:
+      type: object
+      required: [categoryId, roomId, title, status]
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+          example: AC Rusak di Ruang A14
+        description:
+          type: string
+          nullable: true
+          example: AC tidak berfungsi sejak kemarin pagi
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+
+    UpdateReportRequest:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+
+    UpdateReportStatusRequest:
+      type: object
+      required: [status, notes]
+      properties:
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+        notes:
+          type: string
+          nullable: true
+          example: Sudah dicek oleh teknisi
+
+    # ── Report Image ──────────────────────────────────────────
+    ReportImageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reportId:
+          type: string
+          format: uuid
+        imageUrl:
+          type: string
+          format: uri
+          example: https://storage.example.com/reports/img_001.jpg
+        uploadedAt:
+          type: string
+          format: date-time
+
+    # ── Upvote ────────────────────────────────────────────────
+    UpvoteResponse:
+      type: object
+      description: |
+        A unique upvote per user per report, enforced by a composite unique index
+        on `(user_id, report_id)`.
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        reportId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    UpvoteSummaryResponse:
+      type: object
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        totalUpvotes:
+          type: integer
+          example: 12
+        upvotedByMe:
+          type: boolean
+          example: true
+
+    # ── Report Log ────────────────────────────────────────────
+    ReportLogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reportId:
+          type: string
+          format: uuid
+        admin:
+          $ref: '#/components/schemas/UserResponse'
+        oldStatus:
+          $ref: '#/components/schemas/ReportStatus'
+        newStatus:
+          $ref: '#/components/schemas/ReportStatus'
+        notes:
+          type: string
+          nullable: true
+          example: Teknisi sudah ditugaskan
+        createdAt:
+          type: string
+          format: date-time
+
+  # ── Common Parameters ──────────────────────────────────────
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QueryPage:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    QuerySize:
+      name: size
+      in: query
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+    QuerySearch:
+      name: search
+      in: query
+      schema:
+        type: string
+      description: Search by name or title (case-insensitive)
+
+  # ── Common Responses ───────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: Missing or invalid Bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated but insufficient role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ════════════════════════════════════════════
+  # AUTH
+  # ════════════════════════════════════════════
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and obtain access token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and invalidate current session token
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current authenticated user profile
+      operationId: getMe
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ════════════════════════════════════════════
+  # USERS
+  # ════════════════════════════════════════════
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users (Admin only)
+      operationId: listUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - $ref: '#/components/parameters/QuerySearch'
+        - name: role
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserRole'
+      responses:
+        '200':
+          description: Paginated list of users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/UserResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Users]
+      summary: Get user by ID (Admin only)
+      operationId: getUserById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Users]
+      summary: Update user by ID (Admin only)
+      operationId: updateUser
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [Users]
+      summary: Delete user by ID (Admin only)
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get own profile
+      operationId: getOwnProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Own profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Users]
+      summary: Update own profile
+      operationId: updateOwnProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated own profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /users/me/password:
+    patch:
+      tags: [Users]
+      summary: Change own password
+      operationId: changeOwnPassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /users/me/stats:
+    get:
+      tags: [Users]
+      summary: Get own report statistics
+      operationId: getOwnStats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserStatsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ════════════════════════════════════════════
+  # REPORTS
+  # ════════════════════════════════════════════
+
+  /reports:
+    get:
+      tags: [Reports]
+      summary: List reports
+      description: |
+        - **User**: returns only their own reports.  
+        - **Admin**: returns all reports with optional filters.
+      operationId: listReports
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - $ref: '#/components/parameters/QuerySearch'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ReportStatus'
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: roomId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: buildingId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Paginated list of reports
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ReportResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Reports]
+      summary: Create a new report (User)
+      operationId: createReport
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+      responses:
+        '201':
+          description: Report created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /reports/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Reports]
+      summary: Get report by ID
+      operationId: getReportById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Report detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Reports]
+      summary: Update report (owner or Admin)
+      description: Only the reporter or an Admin can update title, description, category, or room. Status changes must use `PATCH /reports/{id}/status`.
+      operationId: updateReport
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportRequest'
+      responses:
+        '200':
+          description: Updated report
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [Reports]
+      summary: Soft-delete report (owner or Admin)
+      description: |
+        Sets `deleted_at` timestamp; the report row itself is **not** permanently removed.
+
+        **Cascade behaviour on hard delete (if ever triggered internally):**  
+        Deleting a report permanently will cascade-delete all related:
+        - `Report_Image` records (FK `delete: cascade`)
+        - `Upvote` records (FK `delete: cascade`)
+        - `Report_Log` entries (FK `delete: cascade`)
+      operationId: deleteReport
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Report soft-deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reports/{id}/status:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    patch:
+      tags: [Reports]
+      summary: Update report status (Admin only)
+      description: |
+        Changes report status and automatically creates a `ReportLog` entry.
+
+        **Allowed transitions:**  
+        `Pending → In_Progress → Completed`  
+        `Pending → Rejected`  
+        `In_Progress → Rejected`
+      operationId: updateReportStatus
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportStatusRequest'
+      responses:
+        '200':
+          description: Status updated, log entry created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ════════════════════════════════════════════
+  # IMAGES
+  # ════════════════════════════════════════════
+
+  /reports/{id}/images:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Images]
+      summary: List images of a report
+      operationId: listReportImages
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of images
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReportImageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Images]
+      summary: Upload images for a report (owner or Admin)
+      description: |
+        Uploads one or more images and associates them with the report.  
+        Images are **cascade-deleted** when the parent report is permanently deleted.
+      operationId: uploadReportImages
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [images]
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: One or more image files (JPEG / PNG, max 5 MB each)
+      responses:
+        '201':
+          description: Images uploaded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReportImageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /reports/{id}/images/{imageId}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+      - name: imageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [Images]
+      summary: Delete a specific image from a report (owner or Admin)
+      operationId: deleteReportImage
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Image deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════
+  # BUILDINGS
+  # ════════════════════════════════════════════
+
+  /buildings:
+    get:
+      tags: [Buildings]
+      summary: List all buildings
+      operationId: listBuildings
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - $ref: '#/components/parameters/QuerySearch'
+      responses:
+        '200':
+          description: Paginated list of buildings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/BuildingResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Buildings]
+      summary: Create a new building (Admin only)
+      operationId: createBuilding
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBuildingRequest'
+      responses:
+        '201':
+          description: Building created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BuildingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /buildings/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Buildings]
+      summary: Get building by ID
+      operationId: getBuildingById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Building detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BuildingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Buildings]
+      summary: Update building (Admin only)
+      operationId: updateBuilding
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBuildingRequest'
+      responses:
+        '200':
+          description: Updated building
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BuildingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [Buildings]
+      summary: Delete building (Admin only)
+      operationId: deleteBuilding
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Building deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /buildings/{id}/rooms:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Buildings]
+      summary: List all rooms in a building
+      operationId: listRoomsByBuilding
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - name: floor
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rooms in the building
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/RoomResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════
+  # ROOMS
+  # ════════════════════════════════════════════
+
+  /rooms:
+    get:
+      tags: [Rooms]
+      summary: List all rooms
+      operationId: listRooms
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - $ref: '#/components/parameters/QuerySearch'
+        - name: buildingId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: floor
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated list of rooms
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/RoomResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Rooms]
+      summary: Create a new room (Admin only)
+      operationId: createRoom
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoomRequest'
+      responses:
+        '201':
+          description: Room created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RoomResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Room code already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /rooms/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Rooms]
+      summary: Get room by ID
+      operationId: getRoomById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Room detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RoomResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Rooms]
+      summary: Update room (Admin only)
+      operationId: updateRoom
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoomRequest'
+      responses:
+        '200':
+          description: Updated room
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RoomResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Room code already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [Rooms]
+      summary: Delete room (Admin only)
+      operationId: deleteRoom
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Room deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════
+  # CATEGORIES
+  # ════════════════════════════════════════════
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      operationId: listCategories
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - $ref: '#/components/parameters/QuerySearch'
+      responses:
+        '200':
+          description: Paginated list of categories
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/CategoryResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Categories]
+      summary: Create a new category (Admin only)
+      operationId: createCategory
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /categories/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Categories]
+      summary: Get category by ID
+      operationId: getCategoryById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Category detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Categories]
+      summary: Update category (Admin only)
+      operationId: updateCategory
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      tags: [Categories]
+      summary: Delete category (Admin only)
+      operationId: deleteCategory
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Category deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════
+  # UPVOTES
+  # ════════════════════════════════════════════
+
+  /reports/{id}/upvotes:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Upvotes]
+      summary: Get upvote summary and status for a report
+      operationId: getUpvoteSummary
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Upvote summary
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpvoteSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Upvotes]
+      summary: Upvote a report (User)
+      description: |
+        Each user may upvote a given report exactly once.  
+        This is enforced at both the API level (returns `409`) and the database level
+        via a composite unique index on `(user_id, report_id)`.  
+        When the parent report is deleted, all its upvotes are **cascade-deleted**.
+      operationId: upvoteReport
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Upvote recorded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UpvoteResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already upvoted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Upvotes]
+      summary: Remove upvote from a report (User)
+      description: Removes the authenticated user's upvote from the report.
+      operationId: removeUpvote
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Upvote removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════
+  # REPORT LOG
+  # ════════════════════════════════════════════
+
+  /reports/{id}/logs:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Report Log]
+      summary: Get audit log for a specific report
+      description: |
+        Returns all status-change log entries for the given report.  
+        - **User**: can view logs of their own reports.  
+        - **Admin**: can view logs of any report.
+
+        Log entries are **cascade-deleted** when the parent report is permanently deleted.
+      operationId: getReportLogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+      responses:
+        '200':
+          description: Paginated log entries for the report
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ReportLogResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /report-logs:
+    get:
+      tags: [Report Log]
+      summary: List all report log entries (Admin only)
+      operationId: listAllReportLogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/QueryPage'
+        - $ref: '#/components/parameters/QuerySize'
+        - name: adminId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by admin who made the change
+        - name: reportId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: newStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/ReportStatus'
+      responses:
+        '200':
+          description: Paginated list of all log entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          content:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ReportLogResponse'
+                          pagination:
+                            $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /report-logs/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Report Log]
+      summary: Get a single log entry by ID (Admin only)
+      operationId: getReportLogById
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Log entry detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ReportLogResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
