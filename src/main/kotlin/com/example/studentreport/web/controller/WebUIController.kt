@@ -19,4 +19,10 @@ class WebUIController {
 
     @GetMapping("/dashboard")
     fun dashboard() = "dashboard_mahasiswa"
+
+    @GetMapping("/feed")
+    fun feed() = "feed"
+
+    @GetMapping("buat-laporan")
+    fun buatLaporan() = "buat_laporan"
 }
