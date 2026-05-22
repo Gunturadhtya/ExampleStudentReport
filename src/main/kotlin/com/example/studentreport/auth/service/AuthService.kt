@@ -8,4 +8,6 @@ import com.example.studentreport.auth.dto.UserResponse
 interface AuthService {
     fun login(request: LoginRequest): AuthResponse
     fun register(request: RegisterRequest): UserResponse
+    fun logout(token: String)
+    fun validateSession(token: String): UserResponse?
 }
