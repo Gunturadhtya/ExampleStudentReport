@@ -10,6 +10,10 @@ info:
     All protected endpoints require a **Bearer token** obtained from `POST /auth/login`.
     Include it as: `Authorization: Bearer <token>`
 
+    Tokens are opaque UUIDs validated server-side against the `Sessions` table on
+    every request. To invalidate a token immediately (logout, ban), the session row
+    is deleted — no wait for expiry required.
+
     ## Idempotency
     Mutating endpoints (`POST`, `PUT`, `PATCH`) that are marked with the
     `Idempotency-Key` header support safe retries. Supply a unique UUID v4 per
@@ -69,7 +73,9 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
+      description: |
+        Opaque session token issued by POST /auth/login.
+        Supply as: `Authorization: Bearer <token>`
 
   # ─────────────────────────────────────────────────────────────────────────────
   # REUSABLE HEADERS
@@ -226,10 +232,15 @@ components:
       properties:
         token:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          format: uuid
+          description: | 
+            Opaque session token (UUID v4). 
+            Store securely and send as `Authorization: Bearer <token>` on every subsequent request.
+          example: a3f5c2d1-7e8b-4a9f-b6c0-1d2e3f4a5b6c
         expiresAt:
           type: string
           format: date-time
+          description: UTC timestamp at which the session expires and the token is no longer valid.
           example: "2026-06-01T12:00:00Z"
         user:
           $ref: '#/components/schemas/UserResponse'
