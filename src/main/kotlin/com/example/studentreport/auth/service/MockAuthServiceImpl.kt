@@ -4,6 +4,7 @@ import com.example.studentreport.auth.dto.AuthResponse
 import com.example.studentreport.auth.dto.LoginRequest
 import com.example.studentreport.auth.dto.RegisterRequest
 import com.example.studentreport.auth.dto.UserResponse
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 // This is only for Mocking not real service
 @Service
+@ConditionalOnProperty(name = ["app.security.mock-auth"], havingValue = "true", matchIfMissing = true)
 class MockAuthServiceImpl: AuthService {
     private data class MockUserEntity(
         val profile: UserResponse,
