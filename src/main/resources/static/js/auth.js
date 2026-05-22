@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const loginForm = document.getElementById('form[action="/login"]');
+    const loginForm = document.getElementById("loginForm");
 
     if (loginForm) {
         loginForm.addEventListener('submit', async function (e) {
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    const registerForm = document.querySelector('form[action="/register"]');
+    const registerForm = document.getElementById("registerForm");
 
     if (registerForm) {
         registerForm.addEventListener('submit', async function (e) {
