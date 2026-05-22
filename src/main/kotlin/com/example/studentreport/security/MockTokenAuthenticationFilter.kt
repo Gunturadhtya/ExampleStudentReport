@@ -1,5 +1,6 @@
 package com.example.studentreport.security
 
+import com.example.studentreport.auth.service.AuthService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -9,23 +10,31 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
-// This is only for Mocking not real authentication filter
 @Component
 @ConditionalOnProperty(name = ["app.security.mock-auth"], havingValue = "true", matchIfMissing = true)
-class MockJwtAuthenticationFilter: JwtAuthenticationFilter() {
+class MockTokenAuthenticationFilter(
+    private val authService: AuthService,
+): TokenAuthenticationFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val authHeader = request.getHeader("Authorization")
-        if (authHeader != null && authHeader.startsWith("Bearer mock.jwt.token.")) {
-            val authorities = listOf(SimpleGrantedAuthority("ROLE_USER"))
-            val authentication = UsernamePasswordAuthenticationToken("mockUserId", null, authorities)
-            SecurityContextHolder.getContext().authentication = authentication
+        var token = request.getHeader("Authorization")?.removePrefix("Bearer ")
+
+        if (token == null) {
+            token = request.cookies.firstOrNull { it.name == "session_token" }?.value
         }
 
+        if (token != null) {
+            val user = authService.validateSession(token)
+
+            if (user != null) {
+                val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.uppercase()}"))
+                val authentication = UsernamePasswordAuthenticationToken(user.id, null, authorities)
+                SecurityContextHolder.getContext().authentication = authentication
+            }
+        }
         filterChain.doFilter(request, response)
     }
-
 }
