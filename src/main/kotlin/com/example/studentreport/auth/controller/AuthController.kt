@@ -6,6 +6,10 @@ import com.example.studentreport.auth.dto.LoginRequest
 import com.example.studentreport.auth.dto.RegisterRequest
 import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.auth.service.AuthService
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseCookie
+import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -18,8 +22,22 @@ class AuthController(
     private val authService: AuthService
 ) {
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ApiResponse<AuthResponse>{
+    fun login(
+        @RequestBody loginRequest: LoginRequest,
+        response: HttpServletResponse
+    ): ApiResponse<AuthResponse>{
         val authData = authService.login(loginRequest)
+
+        val cookie = ResponseCookie.from("session_token", authData.token)
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(3600)
+            .sameSite("Strict")
+            .build()
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+
         return ApiResponse(success = true, message = "Login Successful", data = authData)
     }
 
@@ -32,7 +50,25 @@ class AuthController(
     }
 
     @PostMapping("logout")
-    fun logout(): ApiResponse<Unit> {
+    fun logout(
+        @CookieValue("session_token", required = false) cookieToken: String?,
+        @RequestHeader("Authorization", required = false) headerToken: String?,
+        response: HttpServletResponse
+    ): ApiResponse<Unit> {
+        val token = cookieToken ?: headerToken?.removePrefix("Bearer ")
+
+        if (token != null) {
+            authService.logout(token)
+        }
+
+        val cookie = ResponseCookie.from("session_token", "")
+            .httpOnly(true)
+            .path("/")
+            .maxAge(0)
+            .build()
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+
         return ApiResponse(success = true, message = "Logout Successful")
     }
 }

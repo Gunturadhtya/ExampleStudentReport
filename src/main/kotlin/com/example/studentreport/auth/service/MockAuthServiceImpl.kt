@@ -48,7 +48,7 @@ class MockAuthServiceImpl: AuthService {
         mockSessionDb[tokenString] = newSession
 
         return AuthResponse(
-            token = "mock.jwt.token.${UUID.randomUUID()}",
+            token = tokenString,
             expiresAt = OffsetDateTime.now().plusHours(1),
             user = entity.profile
         )
