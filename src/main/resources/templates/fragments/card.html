@@ -29,9 +29,9 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="d-flex align-items-center gap-2">
                 <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                    <span th:text="${report.reporter != null ? report.reporter.name.substring(0,1) : 'U'}">U</span>
+                    <span th:text="${report.user != null ? report.user.name.substring(0,1) : 'U'}">U</span>
                 </div>
-                <span class="fw-bold text-dark small" th:text="${report.reporter != null ? report.reporter.name : 'Nama Pelapor'}">Nama Pelapor</span>
+                <span class="fw-bold text-dark small" th:text="${report.user != null ? report.user.name : 'Nama Pelapor'}">Nama Pelapor</span>
             </div>
 
             <div class="text-end d-flex align-items-center gap-2">
