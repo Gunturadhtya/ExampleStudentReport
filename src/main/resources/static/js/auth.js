@@ -43,6 +43,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
             const name = document.getElementById('name').value;
             const nim = document.getElementById('nim').value;
+            const faculty = document.getElementById('faculty').value;
+            const major = document.getElementById('major').value;
+            const year = parseInt(document.getElementById('year').value, 10);
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -63,9 +66,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         email: email,
                         password: password,
                         nim: nim,
-                        faculty: "Fakultas",
-                        major: "Prodi",
-                        year: 2024
+                        faculty: faculty,
+                        major: major,
+                        year: year
                     })
                 });
 
