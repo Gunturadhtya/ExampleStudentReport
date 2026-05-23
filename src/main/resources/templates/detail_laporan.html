@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Laporan - Student Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {font-family: 'Inter', sans-serif;}
+    </style>
+</head>
+<body class="bg-light">
+<div class="d-flex min-vh-100">
+    <div th:replace="~{fragments/sidebar :: sidebar-menu(activePage='feed')}"></div>
+    <div class="flex-grow-1 d-flex flex-column bg-white">
+        <div th:replace="~{fragments/header :: top-navbar}"></div>
+
+        <main class="p-4 flex-grow-1" style="background-color: #D4EBF8;">
+            <div class="container-fluid bg-white p-4 shadow-sm" style="border-radius: 12px; max-width: 900px;">
+
+                <div class="d-flex align-items-center mb-4">
+                    <a th:href="@{/feed}" class="text-dark me-3 text-decoration-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </a>
+                    <h3 class="mb-0 fw-bold text-dark font-serif" style="font-size: 1.5rem;">Detail Laporan</h3>
+                </div>
+
+                <div class="bg-white p-4 shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0;">
+
+                    <div class="mb-4 bg-light rounded d-flex align-items-center justify-content-center overflow-hidden position-relative" style="height: 320px; border: 2px dashed #cbd5e1;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h2 class="fw-bold text-dark mb-0" th:text="${report?.title ?: 'AC'}">AC</h2>
+                        <span class="badge px-3 py-2"style="border-radius: 6px; font-size: 0.85rem;"
+                                th:classappend="${report?.status != null ?
+                                                (report.status.name() == 'COMPLETED' ? 'bg-success' :
+                                                (report.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' :
+                                                (report.statys.name() == 'REJECTED' ? 'bg-danger' : 'bg-secondary'))) : 'bg-warning text-dark'}"
+                                th:text="${report?.status ?: 'PENDING'}">PENDING</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-4 mb-4 text-dark small fw-medium" style="font-size: 0.9rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span th:text="${report?.reporter.name ?: 'Nama User'}">Nama User</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span th:text="${report?.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyy, HH:mm'): '12 Apr 2026, 12:15'}">12 Apr 2026, 12:15</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span th:text="${report?.room != null ? report.room.name : 'Ruang A-14 - Lantai 1 - Teknologi Informasi'}">Ruang A-14 - Lantai 1 - Teknologi Informasi</span>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25 my-4">
+
+                    <div class="mb-5">
+                        <h5 class="fw-bold text-dark mb-2" style="font-size: 1rem;">Deskripsi Laporan</h5>
+                        <p class="text-secondary" style="line-height: 1.7;" th:text="${report?.description ?: 'AC di ruang A-14 meneteskan air cukup deras dan mengeluarkan bunyi berisik saat dihidupkan. Mohon segera diperbaiki karena mengganggu aktivitas perkuliahan.'}">AC di ruang A-14 meneteskan air cukup deras dan mengeluarkan bunyi berisik saat dihidupkan. Mohon segera diperbaiki karena mengganggu aktivitas perkuliahan.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4" style="border: 1px solid #e2e8f0;">
+                    <button class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 py-2" style="border-radius: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                        <span class="fw-bold" th:text="${report?.upvotes != null ? report.upvotes.size() : '0'}">0</span> Dukungan
+                    </button>
+                    <span class="text-muted small">Berikan dukungan agar laporan ini diprioritaskan oleh teknisi fasilitas</span>
+                </div>
+
+                <div class="mt-5">
+                    <h5 class="fw-bold text-dark mb-4" style="font-size: 1rem;">Riwayat Status Laporan</h5>
+
+                    <div class="d-flex flex-column gap-3">
+
+                        <div th:each="log : ${report?.logs}" class="bg-light p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark small" style="font-size: 0.85rem;">
+                                        Status berubah:
+                                        <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>
+                                        &rarr;
+                                        <span class="text-primary" th:text="${log.newStatus}">NEW</span>
+                                    </span>
+                                <span class="text-muted small" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm') : 'Tanggal'}">Tanggal</span>
+                            </div>
+                            <p class="text-secondary small mb-0" th:text="${log.notes ?: 'Tidak ada catatan tambahan.'}">Catatan...</p>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(report?.logs)}" class="bg-light p-4 rounded text-center" style="border: 1px dashed #cbd5e1;">
+                            <p class="text-muted small mb-0">Belum ada pembaruan status dari teknisi atau admin.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
