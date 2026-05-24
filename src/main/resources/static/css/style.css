@@ -45,3 +45,11 @@
 .hover-subtle:hover {
     background-color: #E2E8F0;
 }
+
+.hover-elevate {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.hover-elevate:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
