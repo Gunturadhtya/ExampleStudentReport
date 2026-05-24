@@ -23,7 +23,7 @@ class MockTokenAuthenticationFilter(
         var token = request.getHeader("Authorization")?.removePrefix("Bearer ")
 
         if (token == null) {
-            token = request.cookies.firstOrNull { it.name == "session_token" }?.value
+            token = request.cookies?.firstOrNull { it.name == "session_token" }?.value
         }
 
         if (token != null) {
