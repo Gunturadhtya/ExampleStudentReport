@@ -1,5 +1,6 @@
-package com.example.studentreport.security
+package com.example.studentreport.config
 
+import com.example.studentreport.security.TokenAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
