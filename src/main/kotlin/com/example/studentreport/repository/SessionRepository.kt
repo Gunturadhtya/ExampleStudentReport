@@ -7,4 +7,5 @@ import java.util.UUID
 
 @Repository
 interface SessionRepository : JpaRepository<Session, UUID> {
+    fun findByToken(token: String): Session?
 }

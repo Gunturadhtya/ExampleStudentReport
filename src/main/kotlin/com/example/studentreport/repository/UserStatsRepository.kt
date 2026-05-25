@@ -1,12 +1,10 @@
 package com.example.studentreport.repository
 
-import com.example.studentreport.entity.User
+import com.example.studentreport.entity.UserStats
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface UserRepository : JpaRepository<User, UUID> {
-    fun findByEmail(email: String): User?
-    fun existsByEmail(email: String): Boolean
+interface UserStatsRepository: JpaRepository<UserStats, UUID> {
 }
