@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS "Student_Data" (
+CREATE TABLE IF NOT EXISTS student_data (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL UNIQUE,
     "nim" VARCHAR(16) NOT NULL,
@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS "Student_Data" (
     PRIMARY KEY("id")
 );
 
-ALTER TABLE "Student_Data"
-    ADD FOREIGN KEY("user_id") REFERENCES "Users"("id") ON UPDATE NO ACTION ON DELETE CASCADE;
+ALTER TABLE student_data
+    ADD FOREIGN KEY("user_id") REFERENCES users("id") ON UPDATE NO ACTION ON DELETE CASCADE;
