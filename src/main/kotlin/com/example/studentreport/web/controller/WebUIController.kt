@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,7 +23,17 @@ class WebUIController (
     fun register() = "register"
 
     @GetMapping("/dashboard")
-    fun dashboard() = "dashboard_mahasiswa"
+    fun dashboard(authentication: Authentication?): String {
+        val isAdmin = authentication?.authorities?.any {
+            it.authority == "ROLE_ADMIN" || it.authority == "ADMIN"
+        } == true
+
+        if (isAdmin) {
+            return "redirect:/dashboard/admin"
+        }
+
+        return "dashboard_mahasiswa"
+    }
 
     @GetMapping("/dashboard/admin")
     fun dashboardAdmin(model: Model): String {
