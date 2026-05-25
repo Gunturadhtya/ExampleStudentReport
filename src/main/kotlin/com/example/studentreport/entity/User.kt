@@ -1,19 +1,34 @@
 package com.example.studentreport.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 import java.util.UUID
 
 @Entity
 @Table(name = "users")
 data class User(
-    @Id @GeneratedValue val id: UUID? = null,
+    @Id
+    @GeneratedValue
+    val id: UUID? = null,
+
     val email: String,
-    @Column(name = "password_hash") val passwordHash: String,
-    @Column(name = "created_at") val createdAt: Instant,
+
+    @Column(name = "password_hash")
+    val passwordHash: String,
+
+    @Column(name = "created_at")
+    val createdAt: Instant,
+
     var name: String,
-    @Enumerated(EnumType.STRING) var role: UserRole,
-    @Column(name = "updated_at") var updatedAt: Instant,
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    var role: UserRole,
+
+    @Column(name = "updated_at")
+    var updatedAt: Instant,
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL]) 
     var studentData: StudentData? = null,
