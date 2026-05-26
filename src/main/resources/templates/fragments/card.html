@@ -40,7 +40,7 @@
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <span th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyyy HH:mm', 'id') : 'Baru saja'}">Waktu Pembuatan</span>
+                    <span th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyyy HH:mm', 'Asia/Makassar') : 'Baru saja'}">Waktu Pembuatan</span>
                 </div>
 
                 <span class="badge rounded-pill px-3 py-1.5 small font-monospace"
