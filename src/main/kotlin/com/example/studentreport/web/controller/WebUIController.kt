@@ -39,20 +39,39 @@ class WebUIController (
         } == true
     }
 
+    private fun isAuthenticated(auth: Authentication?): Boolean {
+        return auth?.isAuthenticated == true && auth.name != "anonymousUser"
+    }
+
     private fun addCommonAttributes(model: Model, auth: Authentication?) {
         model.addAttribute("isAdmin", isAdmin(auth))
     }
 
     @GetMapping("/")
-    fun rootRedirect(): RedirectView {
+    fun rootRedirect(auth: Authentication?): RedirectView {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) RedirectView("/master-data") else RedirectView("/dashboard")
+        }
         return RedirectView("/login")
     }
 
     @GetMapping("/login")
-    fun login() = "login"
+    fun login(auth: Authentication?): String {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
+        }
+
+        return "login"
+    }
 
     @GetMapping("/register")
-    fun register() = "register"
+    fun register(auth: Authentication?): String {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
+        }
+
+        return "register"
+    }
 
     @GetMapping("/user/logout")
     fun logout(
