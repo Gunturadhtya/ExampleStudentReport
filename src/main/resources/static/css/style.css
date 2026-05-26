@@ -53,3 +53,18 @@
     transform: translateY(-3px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
 }
+
+.nav-tabs .nav-link.custom-tab {
+    font-weight: 600;
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.nav-tabs .nav-link.custom-tab.active {
+    color: #212529 !important;
+    border-bottom: 3px solid #0d6efd !important;
+}
