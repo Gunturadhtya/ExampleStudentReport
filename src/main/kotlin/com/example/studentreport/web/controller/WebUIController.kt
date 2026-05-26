@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.auth.service.AuthService
 import com.example.studentreport.auth.service.ReportServiceImpl
 import com.example.studentreport.repository.CategoryRepository
 import org.springframework.security.core.Authentication
@@ -12,10 +13,16 @@ import com.example.studentreport.repository.RoomRepository
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import com.example.studentreport.entity.Category
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.time.Instant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseCookie
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.bind.annotation.CookieValue
 import java.util.UUID
 
 @Controller
@@ -23,7 +30,8 @@ class WebUIController (
     private val reportRepository: ReportRepository,
     private val reportService: ReportServiceImpl,
     private val categoryRepository: CategoryRepository,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val authService: AuthService
 ) {
     private fun isAdmin(auth: Authentication?) : Boolean {
         return auth?.authorities?.any {
@@ -31,20 +39,63 @@ class WebUIController (
         } == true
     }
 
+    private fun isAuthenticated(auth: Authentication?): Boolean {
+        return auth?.isAuthenticated == true && auth.name != "anonymousUser"
+    }
+
     private fun addCommonAttributes(model: Model, auth: Authentication?) {
         model.addAttribute("isAdmin", isAdmin(auth))
     }
 
     @GetMapping("/")
-    fun rootRedirect(): RedirectView {
+    fun rootRedirect(auth: Authentication?): RedirectView {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) RedirectView("/master-data") else RedirectView("/dashboard")
+        }
         return RedirectView("/login")
     }
 
     @GetMapping("/login")
-    fun login() = "login"
+    fun login(auth: Authentication?): String {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
+        }
+
+        return "login"
+    }
 
     @GetMapping("/register")
-    fun register() = "register"
+    fun register(auth: Authentication?): String {
+        if (isAuthenticated(auth)) {
+            return if (isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
+        }
+
+        return "register"
+    }
+
+    @GetMapping("/user/logout")
+    fun logout(
+        @CookieValue("session_token", required = false) cookieToken: String?,
+        request: HttpServletRequest,
+        response: HttpServletResponse
+    ): String {
+        if (cookieToken != null) {
+            authService.logout(cookieToken)
+        }
+
+        val cookie = ResponseCookie.from("session_token", "")
+            .httpOnly(true)
+            .path("/")
+            .maxAge(0)
+            .build()
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
+
+        SecurityContextHolder.clearContext()
+        request.session.invalidate()
+
+        return "redirect:/login"
+    }
 
     @GetMapping("/dashboard")
     fun dashboard(auth: Authentication?, model: Model): String {
