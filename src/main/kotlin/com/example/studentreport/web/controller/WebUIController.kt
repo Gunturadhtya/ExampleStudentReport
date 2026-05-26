@@ -98,10 +98,32 @@ class WebUIController (
     }
 
     @GetMapping("/dashboard")
-    fun dashboard(auth: Authentication?): String {
-        return if (isAdmin(auth)) {
-            "redirect:/dashboard/admin"
-        } else "dashboard_mahasiswa"
+    fun dashboard(auth: Authentication?, model: Model): String {
+        if (isAdmin(auth)) {
+            return "redirect:/dashboard/admin"
+        }
+
+        addCommonAttributes(model, auth)
+
+        val userReports = reportRepository.findAll()
+
+        val pendingCount = userReports.count {
+            it.status.name.equals("Pending", ignoreCase = true) || it.status.name.equals("In_Progress", ignoreCase = true)
+        }
+        val completedCount = userReports.count {
+            it.status.name.equals("Completed", ignoreCase = true)
+        }
+
+        val userStats = mapOf(
+            "reportCount" to userReports.size,
+            "pendingReport" to pendingCount,
+            "completedReport" to completedCount
+        )
+
+        model.addAttribute("userStats", userStats)
+        model.addAttribute("recentReports", userReports.take(3))
+
+        return "dashboard_mahasiswa"
     }
 
     @GetMapping("/dashboard/admin")
