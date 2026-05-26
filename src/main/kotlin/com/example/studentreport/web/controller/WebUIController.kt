@@ -1,11 +1,26 @@
 package com.example.studentreport.web.controller
 
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.servlet.view.RedirectView
+import com.example.studentreport.repository.ReportRepository
 
 @Controller
-class WebUIController {
+class WebUIController (
+    private val reportRepository: ReportRepository
+) {
+    private fun isAdmin(auth: Authentication?) : Boolean {
+        return auth?.authorities?.any {
+            it.authority == "ROLE_ADMIN" || it.authority == "ADMIN"
+        } == true
+    }
+
+    private fun addCommonAttributes(model: Model, auth: Authentication?) {
+        model.addAttribute("isAdmin", isAdmin(auth))
+    }
+
     @GetMapping("/")
     fun rootRedirect(): RedirectView {
         return RedirectView("/login")
@@ -18,11 +33,45 @@ class WebUIController {
     fun register() = "register"
 
     @GetMapping("/dashboard")
-    fun dashboard() = "dashboard_mahasiswa"
+    fun dashboard(auth: Authentication?): String {
+        return if (isAdmin(auth)) {
+            "redirect:/dashboard/admin"
+        } else "dashboard_mahasiswa"
+    }
+
+    @GetMapping("/dashboard/admin")
+    fun dashboardAdmin(auth: Authentication?,model: Model): String {
+        addCommonAttributes(model, auth)
+        val allReports = reportRepository.findAll()
+
+        val pendingReports = allReports.filter { it.status.name.equals("Pending", ignoreCase = true)}
+        val inProgressCount = allReports.count { it.status.name.equals("In_Progress", ignoreCase = true)}
+        val completedCount = allReports.count { it.status.name.equals("Completed", ignoreCase = true)}
+
+        model.addAttribute("pendingCount", pendingReports.size)
+        model.addAttribute("inProgressCount", inProgressCount)
+        model.addAttribute("completedCount", completedCount)
+        model.addAttribute("pendingReports", pendingReports)
+
+        return "dashboard_admin"
+    }
 
     @GetMapping("/feed")
-    fun feed() = "feed"
+    fun feed(auth: Authentication?, model: Model) : String {
+        addCommonAttributes(model, auth)
+        model.addAttribute("allReports", reportRepository.findAll())
+        return "feed"
+    }
 
     @GetMapping("buat-laporan")
-    fun buatLaporan() = "buat_laporan"
+    fun buatLaporan(auth: Authentication?, model: Model) : String {
+        addCommonAttributes(model, auth)
+        return "buat_laporan"
+    }
+
+    @GetMapping("/master-data")
+    fun masterData(auth: Authentication?, model: Model) : String {
+        addCommonAttributes(model, auth)
+        return "master_data"
+    }
 }
