@@ -1,4 +1,4 @@
-package com.example.studentreport.auth.service
+package com.example.studentreport.web.service
 
 import com.example.studentreport.entity.Report
 import org.springframework.data.domain.Page
