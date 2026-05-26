@@ -1,15 +1,23 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.repository.CategoryRepository
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.servlet.view.RedirectView
 import com.example.studentreport.repository.ReportRepository
+import com.example.studentreport.repository.RoomRepository
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import com.example.studentreport.entity.Category
+import java.time.Instant
 
 @Controller
 class WebUIController (
-    private val reportRepository: ReportRepository
+    private val reportRepository: ReportRepository,
+    private val categoryRepository: CategoryRepository,
+    private val roomRepository: RoomRepository
 ) {
     private fun isAdmin(auth: Authentication?) : Boolean {
         return auth?.authorities?.any {
@@ -71,7 +79,25 @@ class WebUIController (
 
     @GetMapping("/master-data")
     fun masterData(auth: Authentication?, model: Model) : String {
+        if (!isAdmin(auth)) {
+            return "redirect:/dashboard"
+        }
+
         addCommonAttributes(model, auth)
+        model.addAttribute("categories", categoryRepository.findAll())
+        model.addAttribute("rooms", roomRepository.findAll())
         return "master_data"
+    }
+
+    @PostMapping("/admin/categories")
+    fun addCategory(@RequestParam name: String, @RequestParam description: String): String {
+        val newCategory = Category(
+            name = name,
+            description = description,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now()
+        )
+        categoryRepository.save(newCategory)
+        return "redirect:/master-data"
     }
 }
