@@ -47,8 +47,8 @@
                             <tbody class="border-top-0">
                             <tr th:each="report : ${pendingReports ?: #numbers.sequence(1, 3)}">
                                 <td class="px-4 py-3">
-                                    <span class="text-dark small fw-medium" th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyyy', 'id') : 'Hari ini'}">24 Mei 2026</span><br>
-                                    <span class="text-muted" style="font-size: 0.75rem;" th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'HH:mm', 'id') : '08.30'}">08:30 WITA</span>
+                                    <span class="text-dark small fw-medium" th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyyy', 'Asia/Makassar') : 'Hari ini'}">24 Mei 2026</span><br>
+                                    <span class="text-muted" style="font-size: 0.75rem;" th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'HH:mm', 'Asia/Makassar') : '08.30'}">08:30 WITA</span>
                                 </td>
 
                                 <td class="px-4 py-3">
