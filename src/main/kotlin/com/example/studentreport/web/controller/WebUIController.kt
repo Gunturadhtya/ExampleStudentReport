@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.servlet.view.RedirectView
 import com.example.studentreport.repository.ReportRepository
 import com.example.studentreport.repository.RoomRepository
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import com.example.studentreport.entity.Category
+import java.time.Instant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -100,7 +104,25 @@ class WebUIController (
 
     @GetMapping("/master-data")
     fun masterData(auth: Authentication?, model: Model) : String {
+        if (!isAdmin(auth)) {
+            return "redirect:/dashboard"
+        }
+
         addCommonAttributes(model, auth)
+        model.addAttribute("categories", categoryRepository.findAll())
+        model.addAttribute("rooms", roomRepository.findAll())
         return "master_data"
+    }
+
+    @PostMapping("/admin/categories")
+    fun addCategory(@RequestParam name: String, @RequestParam description: String): String {
+        val newCategory = Category(
+            name = name,
+            description = description,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now()
+        )
+        categoryRepository.save(newCategory)
+        return "redirect:/master-data"
     }
 }
