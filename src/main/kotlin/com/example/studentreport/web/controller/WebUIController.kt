@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.auth.service.ReportServiceImpl
 import com.example.studentreport.repository.CategoryRepository
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
@@ -12,10 +13,16 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import com.example.studentreport.entity.Category
 import java.time.Instant
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
+import org.springframework.web.bind.annotation.RequestParam
+import java.util.UUID
 
 @Controller
 class WebUIController (
     private val reportRepository: ReportRepository,
+    private val reportService: ReportServiceImpl,
     private val categoryRepository: CategoryRepository,
     private val roomRepository: RoomRepository
 ) {
@@ -65,9 +72,27 @@ class WebUIController (
     }
 
     @GetMapping("/feed")
-    fun feed(auth: Authentication?, model: Model) : String {
+    fun feed(
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) categoryId: UUID?,
+        @RequestParam(required = false) roomId: UUID?,
+        @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+        auth: Authentication?,
+        model: Model
+    ): String {
         addCommonAttributes(model, auth)
-        model.addAttribute("allReports", reportRepository.findAll())
+
+        val reportsPage = reportService.getFeedReports(search, categoryId, roomId, pageable)
+
+        model.addAttribute("allReports", reportsPage.content)
+
+        model.addAttribute("categories", categoryRepository.findAll())
+        model.addAttribute("rooms", roomRepository.findAll())
+
+        model.addAttribute("currentSearch", search)
+        model.addAttribute("currentCategory", categoryId)
+        model.addAttribute("currentRoom", roomId)
+
         return "feed"
     }
 

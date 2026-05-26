@@ -1,23 +1,44 @@
 package com.example.studentreport.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.Instant
 import java.util.UUID
 
 @Entity
 @Table(name = "reports")
 data class Report(
-    @Id @GeneratedValue val id: UUID? = null,
-    @Column(name = "reporter_id", insertable = false, updatable = false) val reporterId: UUID,
-    @Column(name = "category_id", insertable = false, updatable = false) val categoryId: UUID,
-    @Column(name = "created_at") val createdAt: Instant,
-    @Version var version: Long = 0L,
-    @Column(name = "room_id", insertable = false, updatable = false) var roomId: UUID,
+    @Id @GeneratedValue
+    var id: UUID? = null,
+
+    @Column(name = "reporter_id", insertable = false, updatable = false)
+    var reporterId: UUID,
+
+    @Column(name = "category_id", insertable = false, updatable = false)
+    var categoryId: UUID,
+
+    @Column(name = "created_at")
+    var createdAt: Instant,
+
+    @Version
+    var version: Long = 0L,
+
+    @Column(name = "room_id", insertable = false, updatable = false)
+    var roomId: UUID,
+
     var title: String,
+
     var description: String,
-    @Enumerated(EnumType.STRING) var status: ReportStatus,
-    @Column(name = "updated_at") var updatedAt: Instant,
-    @Column(name = "deleted_at") var deletedAt: Instant? = null,
+
+    @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    var status: ReportStatus,
+
+    @Column(name = "updated_at")
+    var updatedAt: Instant,
+
+    @Column(name = "deleted_at")
+    var deletedAt: Instant? = null,
 
     @ManyToOne
     @JoinColumn(name = "reporter_id")
