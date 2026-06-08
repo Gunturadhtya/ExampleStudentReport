@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fileInput.addEventListener('change', function () {
             const h5Text = uploadArea.querySelector('h5');
             const pText = uploadArea.querySelector('p');
+            const icon = uploadArea.querySelector('i')
 
             if (this.files && this.files.length > 0) {
                 if (this.files.length > 3) {
@@ -44,20 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const modalEditCategory = document.getElementById('modalEditCategory');
-    if (modalEditCategory) {
-        modalEditCategory.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            const desc = button.getAttribute('data-desc');
-
-            modalEditCategory.querySelector('#editCategoryId').value = id;
-            modalEditCategory.querySelector('#editCategoryName').value = name;
-            modalEditCategory.querySelector('#editCategoryDesc').value = desc;
-        })
-    }
-
     const modalEditRoom = document.getElementById('modalEditRoom');
     if (modalEditRoom) {
         modalEditRoom.addEventListener('show.bs.modal', function (event) {
@@ -74,18 +61,6 @@ document.addEventListener("DOMContentLoaded", function () {
             modalEditRoom.querySelector('#editRoomFloor').value = floor;
             modalEditRoom.querySelector('#editRoomCode').value = code;
         })
-    }
-
-    const modalDeleteCategory = document.getElementById('modalDeleteCategory');
-    if (modalDeleteCategory) {
-        modalDeleteCategory.addEventListener('show.bs.modal', function(event) {
-           const button = event.relatedTarget;
-           const id = button.getAttribute('data-id');
-           const name = button.getAttribute('data-name');
-
-           modalDeleteCategory.querySelector('#deleteCategoryId').value = id;
-           modalDeleteCategory.querySelector('#deleteCategoryNameDisplay').textContent = name;
-        });
     }
 
     const modalDeleteRoom = document.getElementById('modalDeleteRoom');
