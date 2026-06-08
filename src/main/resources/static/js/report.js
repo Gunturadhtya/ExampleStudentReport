@@ -8,8 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         fileInput.addEventListener('change', function () {
             const h5Text = uploadArea.querySelector('h5');
-            const pText = uploadArea.querySelector('p');
-            const icon = uploadArea.querySelector('i')
+            const pText = uploadArea.querySelector('p')
 
             if (this.files && this.files.length > 0) {
                 if (this.files.length > 3) {
@@ -22,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     pText.innerHTML = `<span class="text-success fw-bold">${this.files.length} foto siap dikirim:</span><br><small>${fileNames}</small>`;
                 }
             } else {
-                h5Text.textContent = 'Klik untuk unggah atau seret file di sini';
+                h5Text.textContent = 'Klik untuk unggah';
                 h5Text.className = 'h6 fw-bold mb-1';
                 pText.textContent = 'PNG, JPG, dan WEBP. Maks 3 foto (Max 5MB/file)';
             }
@@ -62,6 +61,96 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const trigger = document.getElementById('scroll-trigger');
     if (trigger) observer.observe(trigger);
+
+    const formSubmitReport = document.getElementById('formSubmitReport');
+    if (formSubmitReport) {
+        formSubmitReport.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Memproses...`;
+
+            try {
+                const reportData = {
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value,
+                    categoryId: document.getElementById('categoryId').value,
+                    roomId: this.querySelector('select[name="roomId"]').value
+                };
+
+                const reportRes = await fetch('/api/v1/reports', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                const result = await reportRes.json();
+
+                if (!reportRes.ok || !result.success) {
+                    throw new Error(result.message || "Unknown error");
+                }
+
+                if (fileInput && fileInput.files.length > 0) {
+                    const imgFormData = new FormData();
+                    Array.from(fileInput.files).forEach(file => {
+                        imgFormData.append('images', file);
+                    });
+
+                    await fetch(`/api/v1/reports/${result.data.id}/images`, {
+                        method: 'POST',
+                        body: imgFormData
+                    });
+                }
+
+                window.location.replace('/feed');
+
+            } catch(error) {
+                console.error("API Error:", error);
+                alert('Gagal mengirim laporan: ' + error.message);
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+        });
+    }
+
+    const updateStatusForm = document.getElementById('updateStatusForm');
+    if (updateStatusForm) {
+        updateStatusForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const reportId = this.getAttribute('data-report-id');
+            const status = document.getElementById('reportStatus').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>`;
+
+            try {
+                const response = await fetch(`/api/v1/reports/${reportId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: status, notes: null })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(result.message || 'Unknown error');
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                alert("Gagal memperbarui status: " + error.message);
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+        });
+    }
 });
 
 document.addEventListener('click', async (event) => {
