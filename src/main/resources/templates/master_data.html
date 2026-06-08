@@ -29,13 +29,17 @@
                             <button class="nav-link custom-tab active" id="category-tab" data-bs-toggle="tab" data-bs-target="#pane-category" type="button" role="tab">Kategori Laporan</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link custom-tab" id="location-tab" data-bs-toggle="tab" data-bs-target="#pane-location" type="button" role="tab">Gedung & Ruangan</button>
+                            <button class="nav-link custom-tab" id="building-tab" data-bs-toggle="tab" data-bs-target="#pane-building" type="button" role="tab">Gedung</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link custom-tab" id="location-tab" data-bs-toggle="tab" data-bs-target="#pane-location" type="button" role="tab">Ruangan</button>
                         </li>
                     </ul>
                 </div>
 
                 <div class="card-body p-0 border-top">
                     <div class="tab-content" id="masterDataTabContent">
+
                         <div class="tab-pane fade show active" id="pane-category" role="tabpanel">
                             <div class="d-flex justify-content-between align-items-center p-4">
                                 <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.1rem;">Daftar Kategori</h5>
@@ -79,6 +83,55 @@
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(categories)}">
                                         <td colspan="4" class="text-center py-4 text-muted">Belum ada kategori yang tersedia.</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pane-building" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center p-4">
+                                <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.1rem;">Daftar Gedung</h5>
+                                <button class="btn btn-sm px-3 py-2 fw-bold d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF;" data-bs-toggle="modal" data-bs-target="#modalAddBuilding">
+                                    <i class="bi bi-plus-lg fw-bolder" style="font-size: 1rem;"></i>
+                                    Tambah Gedung
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 10%;">No</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 30%;">Kode Gedung</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 45%;">Nama Gedung</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3 text-end" style="width: 15%;">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="border-top-0">
+                                    <tr th:each="building, stat : ${buildings}">
+                                        <td class="px-4 py-3 text-muted small fw-medium" th:text="${stat.count}">1</td>
+                                        <td class="px-4 py-3 fw-bold text-dark small font-monospace" th:text="${building.code}">FT-ULM</td>
+                                        <td class="px-4 py-3 text-dark small" th:text="${building.name}">Gedung Fakultas Teknik</td>
+                                        <td class="px-4 py-3 text-end">
+                                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                                <button class="btn btn-sm btn-primary fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditBuilding"
+                                                        th:data-id="${building.id}"
+                                                        th:data-code="${building.code}"
+                                                        th:data-name="${building.name}">
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-danger fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalDeleteBuilding"
+                                                        th:data-id="${building.id}"
+                                                        th:data-name="${building.name}">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(buildings)}">
+                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada data gedung yang tersedia.</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -147,6 +200,10 @@
             <div th:replace="~{fragments/modals/category-modals :: edit-category}"></div>
             <div th:replace="~{fragments/modals/category-modals :: delete-category}"></div>
 
+            <div th:replace="~{fragments/modals/building-modals :: add-building}"></div>
+            <div th:replace="~{fragments/modals/building-modals :: edit-building}"></div>
+            <div th:replace="~{fragments/modals/building-modals :: delete-building}"></div>
+
             <div th:replace="~{fragments/modals/room-modals:: add-room}"></div>
             <div th:replace="~{fragments/modals/room-modals:: edit-room}"></div>
             <div th:replace="~{fragments/modals/room-modals:: delete-room}"></div>
@@ -155,8 +212,10 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="/js/api-client.js"></script>
 <script src="/js/script.js"></script>
 <script src="/js/master-category.js"></script>
+<script src="/js/master-building.js"></script>
 <script src="/js/master-room.js"></script>
 </body>
 </html>

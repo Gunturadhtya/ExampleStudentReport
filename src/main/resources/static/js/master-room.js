@@ -45,13 +45,9 @@ document.addEventListener("DOMContentLoaded", function () {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch('/api/v1/rooms', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({buildingId, name, code, floor})
-                });
-
+                const response = await apiClient.post('/api/v1/rooms', { buildingId, name, code, floor });
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {
@@ -84,13 +80,9 @@ document.addEventListener("DOMContentLoaded", function () {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch(`/api/v1/rooms/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({buildingId, name, code, floor})
-                });
-
+                const response = await apiClient.put(`/api/v1/rooms/${id}`, { buildingId, name, code, floor });
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {
@@ -119,11 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch(`/api/v1/rooms/${id}`, {
-                    method: 'DELETE',
-                });
-
+                const response = await apiClient.delete(`/api/v1/rooms/${id}`);
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {

@@ -39,13 +39,9 @@ document.addEventListener("DOMContentLoaded", function() {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch('/api/v1/categories', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description })
-                });
-
+                const response = await apiClient.post('/api/v1/categories', { name, description });
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {
@@ -76,13 +72,9 @@ document.addEventListener("DOMContentLoaded", function() {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch(`/api/v1/categories/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description })
-                });
-
+                const response = await apiClient.put(`/api/v1/categories/${id}`, { name, description });
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {
@@ -111,11 +103,9 @@ document.addEventListener("DOMContentLoaded", function() {
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch(`/api/v1/categories/${id}`, {
-                    method: 'DELETE',
-                });
-
+                const response = await apiClient.delete(`/api/v1/categories/${id}`);
                 const result = await response.json();
+
                 if (response.ok && result.success) {
                     window.location.reload();
                 } else {
