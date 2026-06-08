@@ -100,49 +100,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const upvoteButtons = document.querySelectorAll('.upvote-btn');
-    upvoteButtons.forEach(button => {
-        button.addEventListener('click', async function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            const element = this;
-            const reportId = element.getAttribute('data-report-id');
-            const countSpan = element.querySelector('.upvote-count');
-
-            element.style.pointerEvents = 'none';
-            element.style.opacity = '0.5';
-
-            try {
-                const statusRes = await fetch(`/api/v1/reports/${reportId}/upvotes`);
-                const statusData = await statusRes.json();
-
-                if (statusData.success) {
-                    const isUpvoted = statusData.data.upvotedByMe;
-
-                    if (isUpvoted) {
-                        const delRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'DELETE' });
-
-                        if (delRes.ok) {
-                            countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
-                            element.classList.remove('text-primary');
-                        }
-                    } else {
-                        const addRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'POST' });
-
-                        if (addRes.ok) {
-                            countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                            element.classList.add('text-primary');
-                        }
-                    }
-                }
-            } finally {
-                element.style.pointerEvents = 'auto';
-                element.style.opacity = '1';
-            }
-        });
-    });
-
     let page = 0;
     let isLoading = false;
     let hasMore = true;
@@ -176,4 +133,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const trigger = document.getElementById('scroll-trigger');
     if (trigger) observer.observe(trigger);
+});
+
+
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.upvote-btn');
+
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const reportId = button.getAttribute('data-report-id');
+    const countSpan = button.querySelector('.upvote-count');
+    
+    button.style.pointerEvents = 'none';
+    button.style.opacity = '0.5';
+
+    try {
+        const statusRes = await fetch(`/api/v1/reports/${reportId}/upvotes`);
+        const statusData = await statusRes.json();
+
+        if (statusData.success) {
+            const isUpvoted = statusData.data.upvotedByMe;
+
+            if (isUpvoted) {
+                const delRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'DELETE' });
+                if (delRes.ok) {
+                    countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                    button.classList.remove('text-primary');
+                }
+            } else {
+                const addRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'POST' });
+                if (addRes.ok) {
+                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    button.classList.add('text-primary');
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Upvote failed:", error);
+    } finally {
+        button.style.pointerEvents = 'auto';
+        button.style.opacity = '1';
+    }
 });

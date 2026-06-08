@@ -98,8 +98,15 @@ class WebReportController(
     ): String {
         val actualPageable = if (sort != null) {
             val parts = sort.split(",")
-            PageRequest.of(pageable.pageNumber, pageable.pageSize, Sort.by(Sort.Direction.valueOf(parts[1].uppercase()), parts[0]))
-        } else pageable
+            PageRequest.of(
+                pageable.pageNumber,
+                pageable.pageSize,
+                Sort.by(Sort.Direction.valueOf(parts[1].uppercase()), parts[0])
+                    .and(Sort.by(Sort.Direction.DESC, "id"))
+            )
+        } else {
+            PageRequest.of(pageable.pageNumber, pageable.pageSize, Sort.by(Sort.Direction.DESC, "createdAt", "id"))
+        }
 
         val currentUserId = auth.getUserIdOrNull() ?: throw IllegalStateException("Must be authenticated")
 
