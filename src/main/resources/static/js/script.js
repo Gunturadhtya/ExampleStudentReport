@@ -99,4 +99,47 @@ document.addEventListener("DOMContentLoaded", function () {
             modalDeleteRoom.querySelector('#deleteRoomNameDisplay').textContent = name;
         });
     }
+
+    const upvoteButtons = document.querySelectorAll('.upvote-btn');
+    upvoteButtons.forEach(button => {
+        button.addEventListener('click', async function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const element = this;
+            const reportId = element.getAttribute('data-report-id');
+            const countSpan = element.querySelector('.upvote-count');
+
+            element.style.pointerEvents = 'none';
+            element.style.opacity = '0.5';
+
+            try {
+                const statusRes = await fetch(`/api/v1/reports/${reportId}/upvotes`);
+                const statusData = await statusRes.json();
+
+                if (statusData.success) {
+                    const isUpvoted = statusData.data.upvotedByMe;
+
+                    if (isUpvoted) {
+                        const delRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'DELETE' });
+
+                        if (delRes.ok) {
+                            countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
+                            element.classList.remove('text-primary');
+                        }
+                    } else {
+                        const addRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'POST' });
+
+                        if (addRes.ok) {
+                            countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                            element.classList.add('text-primary');
+                        }
+                    }
+                }
+            } finally {
+                element.style.pointerEvents = 'auto';
+                element.style.opacity = '1';
+            }
+        });
+    });
 });

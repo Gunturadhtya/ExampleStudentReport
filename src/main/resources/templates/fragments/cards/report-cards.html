@@ -25,7 +25,7 @@
 </div>
 
 <div th:fragment="report-card-feed(report)" class="col-12 mb-4">
-    <a th:href="@{/report/{id}(id=${report.id ?: '1'})}" class="card border-0 shadow-sm p-4 bg-white mx-auto style-feed-card text-decoration-none text-dark" style="border-radius: 16px; max-width: 720px; transition: transform 0.2s; cursor: pointer;">
+    <div class="card position-relative border-0 shadow-sm p-4 bg-white mx-auto style-feed-card text-decoration-none text-dark" style="border-radius: 16px; max-width: 720px; transition: transform 0.2s;">
 
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="d-flex align-items-center gap-2">
@@ -60,24 +60,25 @@
             </th:block>
 
             <div th:unless="${report.images != null && !report.images.isEmpty()}"
-                class="w-100 bg-secondary-subtle d-flex align-items-center justify-content-center">
+                 class="w-100 bg-secondary-subtle d-flex align-items-center justify-content-center">
                 <i class="bi bi-image text-secondary" style="font-size: 3.5rem; opacity: 0.7;"></i>
             </div>
         </div>
 
         <div class="d-flex align-items-center gap-3 mb-3 text-dark fw-bold small">
-            <div class="text-dark p-0 d-flex align-items-center gap-1 bg-transparent">
+            <div class="p-1 d-flex align-items-center gap-1 rounded upvote-btn"
+                 style="cursor: pointer; position: relative; z-index: 10; transition: color 0.2s;"
+                 th:data-report-id="${report.id}">
                 <i class="bi bi-chevron-up fw-bold" style="font-size: 1.1rem;"></i>
-                <span class="fw-bold" th:text="${report.upvoteCount}">0</span>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-                <i class="bi bi-chat" style="font-size: 1.05rem;"></i>
-<!--                <span class="fw-bold" th:text="${report.logs != null ? report.logs.size() : '0'}">0</span>-->
+                <span class="fw-bold upvote-count" th:text="${report.upvoteCount}">0</span>
             </div>
         </div>
 
         <div>
-            <h4 class="h6 fw-extrabold text-dark mb-1 text-uppercase" style="letter-spacing: 0.5px;" th:text="${report.title ?: 'JUDUL LAPORAN'}">JUDUL LAPORAN</h4>
+            <h4 class="h6 fw-extrabold text-dark mb-1 text-uppercase" style="letter-spacing: 0.5px;">
+                <a th:href="@{/report/{id}(id=${report.id ?: '1'})}" class="text-dark text-decoration-none stretched-link" th:text="${report.title ?: 'JUDUL LAPORAN'}">JUDUL LAPORAN</a>
+            </h4>
+
             <p class="text-muted small mb-2" th:text="${report.description ?: 'Deskripsi detail mengenai kerusakan fasilitas.'}">Deskripsi kerusakan...</p>
 
             <p class="text-dark fw-semibold small mb-0 d-flex align-items-center gap-1">
@@ -85,7 +86,7 @@
                 <span th:text="${report.room != null && report.room.building != null ? (report.room.building.name + ' - ' + report.room.name + ' - Lantai ' + report.room.floor) : 'Lokasi Belum Ditentukan'}">Lokasi Lengkap</span>
             </p>
         </div>
-    </a>
+    </div>
 </div>
 </body>
 </html>
