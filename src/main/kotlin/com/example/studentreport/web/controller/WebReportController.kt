@@ -63,6 +63,7 @@ class WebReportController(
             buildingId = buildingId,
             status = status,
             includeDeleted = false,
+            reporterId = null,
             currentUserId = currentUserId,
             isAdmin = isAdmin,
             pageable = pageable

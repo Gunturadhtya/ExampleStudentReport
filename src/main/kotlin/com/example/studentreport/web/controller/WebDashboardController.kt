@@ -49,8 +49,8 @@ class WebDashboardController(
         val recentReportsRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "createdAt"))
         val recentReports = reportService.listReports(
             search = null, categoryId = null, roomId = null, buildingId = null,
-            status = null, includeDeleted = false, currentUserId = userId,
-            isAdmin = false, pageable = recentReportsRequest
+            status = null, includeDeleted = false, reporterId = userId,
+            currentUserId = userId, isAdmin = false, pageable = recentReportsRequest
         ).content
 
         model.addAttribute("isAdmin", false)
