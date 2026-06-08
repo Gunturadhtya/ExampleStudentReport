@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import com.example.studentreport.report.dto.CreateReportRequest
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -83,6 +84,32 @@ class WebReportController(
         model.addAttribute("currentSort", currentSort)
 
         return "report/feed"
+    }
+
+    @GetMapping("/feed/fragments")
+    fun getReportsFragment(
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) categoryId: UUID?,
+        @RequestParam(required = false) roomId: UUID?,
+        @RequestParam(required = false) sort: String?,
+        @PageableDefault(size = 20) pageable: Pageable,
+        auth: Authentication?,
+        model: Model
+    ): String {
+        val actualPageable = if (sort != null) {
+            val parts = sort.split(",")
+            PageRequest.of(pageable.pageNumber, pageable.pageSize, Sort.by(Sort.Direction.valueOf(parts[1].uppercase()), parts[0]))
+        } else pageable
+
+        val currentUserId = auth.getUserIdOrNull() ?: throw IllegalStateException("Must be authenticated")
+
+        val reportsPage = reportService.listReports(
+            search, categoryId, roomId, null, null, false, null,
+            currentUserId, webAuthHelper.isAdmin(auth), actualPageable
+        )
+
+        model.addAttribute("allReports", reportsPage.content)
+        return "report/feed :: report-list"
     }
 
     @GetMapping("/buat-laporan")

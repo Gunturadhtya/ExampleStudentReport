@@ -142,4 +142,38 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    let page = 0;
+    let isLoading = false;
+    let hasMore = true;
+
+    const observer = new IntersectionObserver(async (entries) => {
+        if (entries[0].isIntersecting && !isLoading && hasMore) {
+            isLoading = true;
+            page++;
+            document.getElementById('loading-spinner').classList.remove('d-none');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', page);
+
+            try {
+                const res = await fetch(`/feed/fragments?${urlParams.toString()}`);
+                const html = await res.text();
+
+                if (!html.trim()) {
+                    hasMore = false;
+                } else {
+                    document.getElementById('report-feed-container').insertAdjacentHTML('beforeend', html);
+                }
+            } catch (e) {
+                console.error("Scroll load failed", e);
+            } finally {
+                isLoading = false;
+                document.getElementById('loading-spinner').classList.add('d-none');
+            }
+        }
+    }, { threshold: 1.0 });
+
+    const trigger = document.getElementById('scroll-trigger');
+    if (trigger) observer.observe(trigger);
 });
