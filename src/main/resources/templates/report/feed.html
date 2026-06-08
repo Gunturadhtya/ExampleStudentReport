@@ -52,6 +52,18 @@
                             <option value="">Semua Lokasi</option>
                             <option th:each="room : ${rooms}" th:value="${room.id}" th:text="${room.building != null ? room.building.name + ' - ' : ''} + ${room.name}" th:selected="${room.id == currentRoom}"></option>
                         </select>
+
+                        <span class="text-secondary small fw-semibold px-2 border-start ms-1 ps-3 d-flex align-items-center gap-1">
+                            <i class="bi bi-sort-down"></i>
+                            Urutkan
+                        </span>
+
+                        <select name="sort" class="form-select form-select-sm border-0 bg-light text-muted small" style="min-width: 170px;" onchange="document.getElementById('searchFilterForm').submit();">
+                            <option value="createdAt,desc" th:selected="${currentSort == 'createdAt,desc'}">Terbaru</option>
+                            <option value="createdAt,asc" th:selected="${currentSort == 'createdAt,asc'}">Terlama</option>
+                            <option value="upvoteCount,desc" th:selected="${currentSort == 'upvoteCount,desc'}">Dukungan Terbanyak</option>
+                            <option value="upvoteCount,asc" th:selected="${currentSort == 'upvoteCount,asc'}">Dukungan Paling Sedikit</option>
+                        </select>
                     </div>
                 </form>
             </div>

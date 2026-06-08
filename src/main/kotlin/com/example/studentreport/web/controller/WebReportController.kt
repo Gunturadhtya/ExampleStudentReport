@@ -69,6 +69,9 @@ class WebReportController(
             pageable = pageable
         )
 
+        val sortOrder = pageable.sort.firstOrNull()
+        val currentSort = if (sortOrder != null) "${sortOrder.property},${sortOrder.direction.name.lowercase()}" else "createdAt,desc"
+
         model.addAttribute("isAdmin", isAdmin)
         model.addAttribute("allReports", reportsPage.content)
         model.addAttribute("categories", categoryService.getAllCategories(null, Pageable.unpaged()).content)
@@ -77,6 +80,7 @@ class WebReportController(
         model.addAttribute("currentSearch", search)
         model.addAttribute("currentCategory", categoryId)
         model.addAttribute("currentRoom", roomId)
+        model.addAttribute("currentSort", currentSort)
 
         return "report/feed"
     }
