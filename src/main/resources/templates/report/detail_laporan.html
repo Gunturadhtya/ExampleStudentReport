@@ -52,8 +52,8 @@
                                 th:text="${report?.status ?: 'PENDING'}">PENDING</span>
 
                         <div th:if="${isAdmin}" class="d-flex flex-column align-items-end">
-                            <form th:action="@{/report/{id}/status(id=${report.id})}" method="post" class="d-flex gap-2 align-items-center">
-                                    <select name="status" class="form-select form-select-sm fw-bold border-0 shadow-sm"
+                            <form id="updateStatusForm" th:data-report-id="${report.id}" class="d-flex gap-2 align-items-center">
+                                    <select id="reportStatus" name="status" class="form-select form-select-sm fw-bold border-0 shadow-sm"
                                             th:classappend="${report.status.name() == 'COMPLETED' ? 'bg-success text-white' :
                                                             (report.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' :
                                                             (report.status.name() == 'REJECTED' ? 'bg-danger text-white' : 'bg-secondary text-white'))}"
@@ -63,7 +63,7 @@
                                         <option value="COMPLETED" th:selected="${report.status.name() == 'COMPLETED'}">COMPLETED</option>
                                         <option value="REJECTED" th:selected="${report.status.name() == 'REJECTED'}">REJECTED</option>
                                     </select>
-                                <button type="submit" class="btn btn-sm btn-dark px-3 fw-medium shadow-sm">Simpan</button>
+                                <button type="submit" id="updateStatusBtn" class="btn btn-sm btn-dark px-3 fw-medium shadow-sm">Simpan</button>
                             </form>
                             <small class="text-muted mt-1" style="font-size: 0.75rem;">*Update status laporan</small>
                         </div>
