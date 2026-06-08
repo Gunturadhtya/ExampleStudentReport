@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Memproses...`;
 
@@ -83,12 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     roomId: this.querySelector('select[name="roomId"]').value
                 };
 
-                const reportRes = await fetch('/api/v1/reports', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(reportData)
-                });
-
+                const reportRes = await apiClient.post('/api/v1/reports', reportData);
                 const result = await reportRes.json();
 
                 if (!reportRes.ok || !result.success) {
@@ -101,10 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         imgFormData.append('images', file);
                     });
 
-                    await fetch(`/api/v1/reports/${result.data.id}/images`, {
-                        method: 'POST',
-                        body: imgFormData
-                    });
+                    await apiClient.post(`/api/v1/reports/${result.data.id}/images`, imgFormData);
                 }
 
                 window.location.replace('/feed');
@@ -133,10 +126,9 @@ document.addEventListener("DOMContentLoaded", function () {
             submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>`;
 
             try {
-                const response = await fetch(`/api/v1/reports/${reportId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: status, notes: null })
+                const response = await apiClient.patch(`/api/v1/reports/${reportId}/status`, {
+                    status: status,
+                    notes: null
                 });
 
                 const result = await response.json();
@@ -172,20 +164,20 @@ document.addEventListener('click', async (event) => {
     button.style.opacity = '0.5';
 
     try {
-        const statusRes = await fetch(`/api/v1/reports/${reportId}/upvotes`);
+        const statusRes = await apiClient.get(`/api/v1/reports/${reportId}/upvotes`);
         const statusData = await statusRes.json();
 
         if (statusData.success) {
             const isUpvoted = statusData.data.upvotedByMe;
 
             if (isUpvoted) {
-                const delRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'DELETE' });
+                const delRes = await apiClient.delete(`/api/v1/reports/${reportId}/upvotes`);
                 if (delRes.ok) {
                     countSpan.textContent = Math.max(0, parseInt(countSpan.textContent) - 1);
                     button.classList.remove('text-primary');
                 }
             } else {
-                const addRes = await fetch(`/api/v1/reports/${reportId}/upvotes`, { method: 'POST' });
+                const addRes = await apiClient.post(`/api/v1/reports/${reportId}/upvotes`);
                 if (addRes.ok) {
                     countSpan.textContent = parseInt(countSpan.textContent) + 1;
                     button.classList.add('text-primary');
