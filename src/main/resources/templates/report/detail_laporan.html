@@ -29,11 +29,14 @@
 
                     <div class="mb-4 bg-light rounded d-flex align-items-center overflow-auto position-relative gap-2 p-2" style="height: 320px; border: 2px dashed #cbd5e1;">
                         <th:block th:if="${report?.images != null && !report.images.isEmpty()}">
-                            <img th:each="img : ${report.images}"
-                                 th:src="${img.imageUrl}"
-                                 class="h-100 object-fit-cover rounded shadow-sm"
-                                 style="flex: 0 0 auto; width: auto; max-width: 95%;"
-                                 alt="Foto Kerusakan">
+                            <div th:each="img : ${report.images}" class="position-relative h-100" style="flex: 0 0 auto; width: auto; max-width: 95%;">
+                                <img th:src="${img.imageUrl}" class="h-100 object-fit-cover rounded shadow-sm" alt="Foto Kerusakan">
+                                <button th:if="${isAdmin || report.status.name() == 'PENDING'}"
+                                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle btn-delete-image shadow"
+                                        th:data-image-id="${img.id}" th:data-report-id="${report.id}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </th:block>
 
                         <div th:unless="${report?.images != null && !report.images.isEmpty()}"
@@ -84,6 +87,15 @@
                         </div>
                     </div>
 
+                    <div class="d-flex gap-2" th:if="${!isAdmin && report.status.name() == 'PENDING'}">
+                        <button class="btn btn-sm btn-outline-primary fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditReport">Edit Laporan</button>
+                        <button class="btn btn-sm btn-outline-danger fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDeleteReport">Hapus Laporan</button>
+                    </div>
+
+                    <div class="d-flex gap-2" th:if="${isAdmin}">
+                        <button class="btn btn-sm btn-outline-danger fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDeleteReport">Hapus Laporan</button>
+                    </div>
+
                     <hr class="text-muted opacity-25 my-4">
 
                     <div class="mb-5">
@@ -130,6 +142,8 @@
                     </div>
                 </div>
             </div>
+
+            <div th:replace="~{fragments/modals/report-modals :: actionModals}"></div>
         </main>
     </div>
 </div>
@@ -137,6 +151,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script src="/js/api-client.js"></script>
 <script src="/js/script.js"></script>
-<script src="/js/report.js"></script>
+<script src="/js/report-feed.js"></script>
+<script src="/js/report-actions.js"></script>
 </body>
 </html>
