@@ -12,7 +12,7 @@ import java.util.UUID
 interface ReportService {
     fun listReports(
         search: String?, categoryId: UUID?, roomId: UUID?, buildingId: UUID?,
-        status: ReportStatus?, includeDeleted: Boolean,
+        status: ReportStatus?, includeDeleted: Boolean, reporterId: UUID?,
         currentUserId: UUID, isAdmin: Boolean, pageable: Pageable
     ): Page<ReportResponse>
     fun createReport(userId: UUID, request: CreateReportRequest): ReportResponse

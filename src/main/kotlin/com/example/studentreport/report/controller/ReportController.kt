@@ -40,12 +40,13 @@ class ReportController(
         @RequestParam(required = false) roomId: UUID?,
         @RequestParam(required = false) buildingId: UUID?,
         @RequestParam(required = false) status: ReportStatus?,
+        @RequestParam(required = false) reporterId: UUID?,
         @RequestParam(required = false, defaultValue = "false") includeDeleted: Boolean,
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponse<Page<ReportResponse>> {
         val reports = reportService.listReports(
             search, categoryId, roomId, buildingId, status, includeDeleted,
-            authentication.getUserId(), webAuthHelper.isAdmin(authentication), pageable
+            reporterId, authentication.getUserId(), webAuthHelper.isAdmin(authentication), pageable
         )
         return ApiResponse(success = true, message = "Reports retrieved successfully", data = reports)
     }

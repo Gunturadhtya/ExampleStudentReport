@@ -1,6 +1,7 @@
 package com.example.studentreport.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Instant
@@ -52,12 +53,15 @@ data class Report(
     @JoinColumn(name = "category_id")
     var category: Category? = null,
 
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "report", cascade = [CascadeType.ALL])
     var images: MutableList<ReportImage> = mutableListOf(),
 
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "report", cascade = [CascadeType.ALL])
     var upvotes: MutableList<Upvote> = mutableListOf(),
 
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "report", cascade = [CascadeType.ALL])
     var logs: MutableList<ReportLog> = mutableListOf()
 ) {

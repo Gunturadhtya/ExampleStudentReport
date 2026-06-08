@@ -35,10 +35,9 @@ class ReportServiceImpl(
     @Transactional(readOnly = true)
     override fun listReports(
         search: String?, categoryId: UUID?, roomId: UUID?, buildingId: UUID?,
-        status: ReportStatus?, includeDeleted: Boolean,
+        status: ReportStatus?, includeDeleted: Boolean, reporterId: UUID?,
         currentUserId: UUID, isAdmin: Boolean, pageable: Pageable
     ): Page<ReportResponse> {
-        val targetUserId = if (isAdmin) null else currentUserId
         val allowDeleted = isAdmin && includeDeleted
 
         val spec = ReportSpecification.withFilters(
@@ -48,9 +47,9 @@ class ReportServiceImpl(
             buildingId = buildingId,
             status = status,
             includeDeleted = allowDeleted,
-            userId = targetUserId
+            userId = reporterId
         )
-        return reportRepository.findAll(spec, pageable).map { it.toResponse() }
+        return reportRepository.findAll(spec, pageable).map { it.toResponse(currentUserId) }
     }
 
     @Transactional
@@ -83,7 +82,7 @@ class ReportServiceImpl(
             userStatsRepository.save(stats)
         }
 
-        return savedReport.toResponse()
+        return savedReport.toResponse(userId)
     }
 
     @Transactional(readOnly = true)
@@ -91,11 +90,11 @@ class ReportServiceImpl(
         val report = reportRepository.findById(id)
             .orElseThrow { IllegalArgumentException("Report not found") }
 
-        if (!isAdmin && report.reporterId != currentUserId) {
+        if (!isAdmin && report.isDeleted()) {
             throw AccessDeniedException("Access denied")
         }
 
-        return report.toResponse()
+        return report.toResponse(currentUserId)
     }
 
     @Transactional
@@ -117,7 +116,7 @@ class ReportServiceImpl(
         request.roomId?.let { report.roomId = it }
         report.updatedAt = Instant.now()
 
-        return reportRepository.save(report).toResponse()
+        return reportRepository.save(report).toResponse(currentUserId)
     }
 
     @Transactional
@@ -195,7 +194,7 @@ class ReportServiceImpl(
         return reportRepository.findAll(spec, pageable).map { it.toResponse() }
     }
 
-    private fun Report.toResponse(): ReportResponse {
+    private fun Report.toResponse(currentUserId: UUID? = null): ReportResponse {
         return ReportResponse(
             id = this.id!!,
             version = this.version,
@@ -215,6 +214,7 @@ class ReportServiceImpl(
             description = this.description,
             status = this.status,
             upvoteCount = this.upvotes.size,
+            isUpvotedByMe = currentUserId != null && this.upvotes.any { it.userId == currentUserId },
             images = this.images.map { img ->
                 ReportImageResponse(img.id!!, img.reportId, img.imageUrl, img.uploadedAt.atOffset(ZoneOffset.UTC))
             },
