@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pengguna - Student Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light" style="font-family: 'Inter', sans-serif;">
+
+<div class="d-flex min-vh-100">
+    <div th:replace="~{fragments/sidebar :: sidebar-menu(activePage='users')}"></div>
+
+    <div class="flex-grow-1 d-flex flex-column bg-white">
+        <div th:replace="~{fragments/header :: top-navbar}"></div>
+
+        <main class="p-4 flex-grow-1" style="background-color: #D4EBF8;">
+            <div class="mb-4">
+                <h2 class="h4 fw-bold text-dark mb-1">Manajemen Pengguna</h2>
+                <p class="text-secondary small mb-0">Kelola akun mahasiswa dan administrator sistem.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Nama</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Email</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Peran</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Bergabung</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3 text-end">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody class="border-top-0">
+                            <tr th:each="u : ${users}">
+                                <td class="px-4 py-3 fw-bold text-dark small" th:text="${u.name}">Nama</td>
+                                <td class="px-4 py-3 text-muted small" th:text="${u.email}">email@mhs.ulm.ac.id</td>
+                                <td class="px-4 py-3">
+                                    <span class="badge"
+                                          th:classappend="${u.role == 'ADMIN'} ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'"
+                                          th:text="${u.role}">USER</span>
+                                </td>
+                                <td class="px-4 py-3 text-muted small" th:text="${#temporals.format(u.createdAt, 'dd MMM yyyy')}">01 Jan 2026</td>
+                                <td class="px-4 py-3 text-end text-nowrap">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <button class="btn btn-sm btn-info text-white fw-medium px-3 py-1 btn-stats"
+                                                data-bs-toggle="modal" data-bs-target="#modalUserStats"
+                                                th:data-id="${u.id}"
+                                                th:data-name="${u.name}">
+                                            <i class="bi bi-bar-chart-fill"></i> Stats
+                                        </button>
+                                        <button class="btn btn-sm btn-primary fw-medium px-3 py-1 btn-edit"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditUser"
+                                                th:data-id="${u.id}"
+                                                th:data-name="${u.name}"
+                                                th:data-email="${u.email}"
+                                                th:data-role="${u.role}">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger fw-medium px-3 py-1"
+                                                data-bs-toggle="modal" data-bs-target="#modalDeleteUser"
+                                                th:data-id="${u.id}"
+                                                th:data-name="${u.name}">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalEditUser" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                            <h1 class="modal-title h5 fw-bold text-dark">Edit Pengguna</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="formEditUser" onsubmit="event.preventDefault();">
+                            <input type="hidden" id="editUserId" name="id">
+                            <input type="hidden" id="editUserRole" name="role">
+                            <div class="modal-body px-4 py-3">
+                                <h6 class="fw-bold text-muted small mb-3 border-bottom pb-2">Informasi Akun</h6>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark small">Nama Lengkap</label>
+                                    <input type="text" class="form-control py-2" id="editUserName" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark small">Email</label>
+                                    <input type="email" class="form-control py-2" id="editUserEmail" name="email" required>
+                                </div>
+
+                                <div id="studentDataSection" class="d-none mt-4">
+                                    <h6 class="fw-bold text-muted small mb-3 border-bottom pb-2">Data Akademik Mahasiswa</h6>
+                                    <div class="row g-2">
+                                        <div class="col-6 mb-2">
+                                            <label class="form-label fw-semibold text-dark small">NIM</label>
+                                            <input type="text" class="form-control py-2" id="editUserNim" name="nim">
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <label class="form-label fw-semibold text-dark small">Tahun</label>
+                                            <input type="number" class="form-control py-2" id="editUserYear" name="year">
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <label class="form-label fw-semibold text-dark small">Fakultas</label>
+                                            <input type="text" class="form-control py-2" id="editUserFaculty" name="faculty">
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <label class="form-label fw-semibold text-dark small">Program Studi</label>
+                                            <input type="text" class="form-control py-2" id="editUserMajor" name="major">
+                                        </div>
+                                    </div>
+                                    <div id="studentDataLoading" class="text-center text-muted small mt-2 d-none">
+                                        <div class="spinner-border spinner-border-sm" role="status"></div> Mengambil data akademik...
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
+                                <button type="button" class="btn btn-white border fw-semibold text-dark" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn fw-bold px-4" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalUserStats" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                            <h1 class="modal-title h5 fw-bold text-dark">Statistik Pelapor</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body px-4 py-3">
+                            <p class="fw-semibold text-primary mb-3" id="statsUserName"></p>
+                            <div id="statsContent" class="d-none">
+                                <ul class="list-group list-group-flush border-0 small">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Total Laporan <span class="badge bg-secondary rounded-pill" id="statTotal">0</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Menunggu (Pending) <span class="badge bg-warning rounded-pill text-dark" id="statPending">0</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Sedang Diproses <span class="badge bg-info rounded-pill" id="statInProgress">0</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Selesai <span class="badge bg-success rounded-pill" id="statCompleted">0</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Ditolak <span class="badge bg-danger rounded-pill" id="statRejected">0</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="statsLoading" class="text-center text-muted my-4">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalDeleteUser" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                            <h1 class="modal-title h5 fw-bold text-danger">Konfirmasi Hapus Akun</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="formDeleteUser" onsubmit="event.preventDefault();">
+                            <input type="hidden" id="deleteUserId" name="id">
+                            <div class="modal-body px-4 py-3">
+                                <p class="text-dark mb-0">Hapus akun <span id="deleteUserNameDisplay" class="fw-bold"></span> secara permanen?</p>
+                                <p class="text-danger small mt-2 mb-0 bg-danger-subtle p-2 rounded"><i class="bi bi-exclamation-triangle"></i> Operasi ini akan memicu error konstrain database jika pengguna telah membuat laporan atau berinteraksi dengan laporan.</p>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
+                                <button type="button" class="btn btn-white border fw-semibold text-dark" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-danger fw-bold px-4">Ya, Hapus</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api-client.js"></script>
+<script src="/js/script.js"></script>
+<script src="/js/user-management.js"></script>
+</body>
+</html>

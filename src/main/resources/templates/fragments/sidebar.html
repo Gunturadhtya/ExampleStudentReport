@@ -33,6 +33,12 @@
             <i class="bi bi-box" style="font-size: 1.15rem;"></i>
             <span>Master Data</span>
         </a>
+
+        <a th:if="${isAdmin}" th:href="@{/admin/users}" class="nav-link-custom d-flex align-items-center gap-3 py-3 px-3 rounded text-decoration-none fw-semibold"
+           th:classappend="${activePage == 'users'} ? 'active' : 'text-secondary'">
+            <i class="bi bi-people" style="font-size: 1.15rem;"></i>
+            <span>Manajemen Pengguna</span>
+        </a>
     </div>
 
     <div class="p-3 border-top bg-light-subtle">
