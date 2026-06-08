@@ -2,6 +2,7 @@ package com.example.studentreport.entity
 
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.Formula
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Instant
@@ -52,6 +53,9 @@ data class Report(
     @ManyToOne
     @JoinColumn(name = "category_id")
     var category: Category? = null,
+
+    @Formula("(SELECT COUNT(u.id) FROM upvotes u WHERE u.report_id = id)")
+    var upvoteCount: Int = 0,
 
     @BatchSize(size = 50)
     @OneToMany(mappedBy = "report", cascade = [CascadeType.ALL])
