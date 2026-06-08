@@ -138,7 +138,22 @@ class WebReportController(
         model.addAttribute("report", report)
         model.addAttribute("logs", logs)
         model.addAttribute("isAdmin", isAdmin)
+        model.addAttribute("categories", categoryService.getAllCategories(null, Pageable.unpaged()).content)
+        model.addAttribute("rooms", roomService.getAllRooms(null, null, null, Pageable.unpaged()).content)
 
         return "report/detail_laporan"
+    }
+
+    @GetMapping("/admin/report-logs")
+    fun globalReportLogs(auth: Authentication?, model: Model, @PageableDefault(size = 50, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable): String {
+        if (!webAuthHelper.isAdmin(auth)) {
+            return "redirect:/dashboard"
+        }
+
+        val logs = reportLogService.getAllReportLogs(null, null, null, pageable).content
+        model.addAttribute("isAdmin", true)
+        model.addAttribute("logs", logs)
+
+        return "admin_report_logs"
     }
 }
