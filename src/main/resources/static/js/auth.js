@@ -28,15 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('/api/v1/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                    })
+                const response = await apiClient.post('/api/v1/auth/login', {
+                    email: email,
+                    password: password,
                 });
 
                 const result = await response.json();
@@ -75,20 +69,14 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             try {
-                const response = await fetch('/api/v1/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        password: password,
-                        nim: nim,
-                        faculty: faculty,
-                        major: major,
-                        year: year
-                    })
+                const response = await apiClient.post('/api/v1/auth/register', {
+                    name: name,
+                    email: email,
+                    password: password,
+                    nim: nim,
+                    faculty: faculty,
+                    major: major,
+                    year: year
                 });
 
                 const result = await response.json();
