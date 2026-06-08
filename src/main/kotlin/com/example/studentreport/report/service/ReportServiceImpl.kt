@@ -213,7 +213,7 @@ class ReportServiceImpl(
             title = this.title,
             description = this.description,
             status = this.status,
-            upvoteCount = this.upvotes.size,
+            upvoteCount = this.upvoteCount,
             isUpvotedByMe = currentUserId != null && this.upvotes.any { it.userId == currentUserId },
             images = this.images.map { img ->
                 ReportImageResponse(img.id!!, img.reportId, img.imageUrl, img.uploadedAt.atOffset(ZoneOffset.UTC))
