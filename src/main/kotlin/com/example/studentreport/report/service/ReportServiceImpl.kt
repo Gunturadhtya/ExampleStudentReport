@@ -1,6 +1,7 @@
 package com.example.studentreport.report.service
 
 import com.example.studentreport.auth.dto.UserResponse
+import com.example.studentreport.category.dto.CategoryResponse
 import com.example.studentreport.entity.Report
 import com.example.studentreport.entity.ReportLog
 import com.example.studentreport.entity.ReportStatus
@@ -24,6 +25,7 @@ import jakarta.persistence.EntityManager
 import com.example.studentreport.entity.User
 import com.example.studentreport.entity.Category
 import com.example.studentreport.entity.Room
+import com.example.studentreport.room.dto.RoomResponse
 
 @Service
 class ReportServiceImpl(
@@ -206,8 +208,31 @@ class ReportServiceImpl(
                 createdAt = this.user!!.createdAt.atOffset(ZoneOffset.UTC),
                 updatedAt = this.user!!.updatedAt.atOffset(ZoneOffset.UTC)
             ),
-            category = this.category!!,
-            room = this.room!!,
+            category = CategoryResponse(
+                id = this.category!!.id!!,
+                name = this.category!!.name,
+                description = this.category!!.description,
+                createdAt = this.category!!.createdAt.atOffset(ZoneOffset.UTC),
+                updatedAt = this.category!!.updatedAt.atOffset(ZoneOffset.UTC)
+            ),
+            room = RoomResponse(
+                id = this.room!!.id!!,
+                buildingId = this.room!!.buildingId,
+                building = this.room!!.building?.let { b ->
+                    com.example.studentreport.building.dto.BuildingResponse(
+                        id = b.id!!,
+                        name = b.name,
+                        code = b.code,
+                        createdAt = b.createdAt.atOffset(ZoneOffset.UTC),
+                        updatedAt = b.updatedAt.atOffset(ZoneOffset.UTC)
+                    )
+                },
+                name = this.room!!.name,
+                floor = this.room!!.floor,
+                code = this.room!!.code,
+                createdAt = this.room!!.createdAt.atOffset(ZoneOffset.UTC),
+                updatedAt = this.room!!.updatedAt.atOffset(ZoneOffset.UTC)
+            ),
             categoryId = this.categoryId,
             roomId = this.roomId,
             title = this.title,
