@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - Student Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="d-flex min-vh-100">
+    <div th:replace="~{fragments/sidebar :: sidebar-menu(activePage='settings')}"></div>
+
+    <div class="flex-grow-1 d-flex flex-column bg-white">
+        <div th:replace="~{fragments/header :: top-navbar}"></div>
+
+        <main class="p-4 flex-grow-1" style="background-color: #D4EBF8;">
+            <div class="mb-4">
+                <h2 class="h4 fw-bold text-dark mb-1">Pengaturan Akun</h2>
+                <p class="text-secondary small mb-0">Kelola informasi profil dan keamanan akun Anda</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-4">Informasi Profil</h5>
+                            <form id="formUpdateProfile">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark small">Nama Lengkap</label>
+                                    <input type="text" class="form-control py-2" name="name" th:value="${user.name}" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark small">Email</label>
+                                    <input type="email" class="form-control py-2" name="email" th:value="${user.email}" required>
+                                </div>
+                                <button type="submit" class="btn fw-bold px-4 w-100" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF;">Simpan Profil</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-4">Ubah Kata Sandi</h5>
+                            <form id="formChangePassword">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark small">Kata Sandi Saat Ini</label>
+                                    <input type="password" class="form-control py-2" name="oldPassword" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark small">Kata Sandi Baru</label>
+                                    <input type="password" class="form-control py-2" name="newPassword" minlength="8" required>
+                                </div>
+                                <button type="submit" class="btn fw-bold px-4 w-100" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF;">Perbarui Kata Sandi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12" th:if="${!isAdmin && studentData != null}">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-4">Data Akademik Mahasiswa</h5>
+                            <form id="formUpdateStudentData">
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark small">NIM</label>
+                                        <input type="text" class="form-control py-2" name="nim" th:value="${studentData.nim}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark small">Tahun Angkatan</label>
+                                        <input type="number" class="form-control py-2" name="year" th:value="${studentData.year}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark small">Fakultas</label>
+                                        <input type="text" class="form-control py-2" name="faculty" th:value="${studentData.faculty}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark small">Program Studi</label>
+                                        <input type="text" class="form-control py-2" name="major" th:value="${studentData.major}" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn fw-bold px-4" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF;">Simpan Data Akademik</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>
