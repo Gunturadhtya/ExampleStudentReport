@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Service
-@ConditionalOnProperty(name = ["app.security.mock-auth"], havingValue = "false")
 class AuthServiceImpl(
     private val userRepository: UserRepository,
     private val sessionRepository: SessionRepository,

@@ -22,25 +22,13 @@ class SecurityConfig(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) }
+            .csrf{it.disable()}
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
-                auth.requestMatchers("/api/v1/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
-                auth.requestMatchers("/login", "/register", "/error").permitAll()
-                auth.requestMatchers("/profile/admin", "/profile/student").authenticated()
-                auth.requestMatchers("/master-data/**").authenticated() 
+                auth.requestMatchers("/api/v1/auth/**").permitAll()
+                auth.requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                auth.requestMatchers("/", "/login", "/register", "/error").permitAll()
                 auth.anyRequest().authenticated()
-            }
-            .formLogin { form ->
-                form.loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
-                    .permitAll()
-            }
-            .logout { logout ->
-                logout.logoutUrl("/logout")
-                      .logoutSuccessUrl("/login")
-                      .invalidateHttpSession(true)
-                      .deleteCookies("JSESSIONID")
             }
             .addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterAfter(idempotencyFilter, UsernamePasswordAuthenticationFilter::class.java)

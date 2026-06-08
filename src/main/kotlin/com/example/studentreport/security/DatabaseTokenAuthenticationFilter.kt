@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(name = ["app.security.mock-auth"], havingValue = "false")
 class DatabaseTokenAuthenticationFilter(
     private val authService: AuthService
 ) : TokenAuthenticationFilter() {
@@ -21,11 +20,6 @@ class DatabaseTokenAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val path = request.requestURI
-        if (!path.startsWith("/api/")) {
-            filterChain.doFilter(request, response)
-            return
-        }
 
         var token = request.getHeader("Authorization")?.removePrefix("Bearer ")
 
