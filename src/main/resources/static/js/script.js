@@ -45,36 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const modalEditRoom = document.getElementById('modalEditRoom');
-    if (modalEditRoom) {
-        modalEditRoom.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const building = button.getAttribute('data-building');
-            const name = button.getAttribute('data-name');
-            const floor = button.getAttribute('data-floor');
-            const code = button.getAttribute('data-code');
-
-            modalEditRoom.querySelector('#editRoomId').value = id;
-            modalEditRoom.querySelector('#editRoomBuilding').value = building;
-            modalEditRoom.querySelector('#editRoomName').value = name;
-            modalEditRoom.querySelector('#editRoomFloor').value = floor;
-            modalEditRoom.querySelector('#editRoomCode').value = code;
-        })
-    }
-
-    const modalDeleteRoom = document.getElementById('modalDeleteRoom');
-    if (modalDeleteRoom) {
-        modalDeleteRoom.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-
-            modalDeleteRoom.querySelector('#deleteRoomId').value = id;
-            modalDeleteRoom.querySelector('#deleteRoomNameDisplay').textContent = name;
-        });
-    }
-
     let page = 0;
     let isLoading = false;
     let hasMore = true;
