@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Aktivitas - Student Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light" style="font-family: 'Inter', sans-serif;">
+
+<div class="d-flex min-vh-100">
+    <div th:replace="~{fragments/sidebar :: sidebar-menu(activePage='auditLogs')}"></div>
+
+    <div class="flex-grow-1 d-flex flex-column bg-white">
+        <div th:replace="~{fragments/header :: top-navbar}"></div>
+
+        <main class="p-4 flex-grow-1" style="background-color: #D4EBF8;">
+            <div class="mb-4">
+                <h2 class="h4 fw-bold text-dark mb-1">Global Audit Log</h2>
+                <p class="text-secondary small mb-0">Lacak riwayat perubahan status dari seluruh laporan di sistem.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Waktu</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Admin</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">ID Laporan</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Perubahan Status</th>
+                                <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3">Catatan</th>
+                            </tr>
+                            </thead>
+                            <tbody class="border-top-0">
+                            <tr th:each="log : ${logs}">
+                                <td class="px-4 py-3 text-muted small" th:text="${#temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm')}">Waktu</td>
+                                <td class="px-4 py-3 fw-bold text-dark small" th:text="${log.admin.name}">Admin</td>
+                                <td class="px-4 py-3 text-muted small">
+                                    <a th:href="@{/report/{id}(id=${log.reportId})}" class="text-decoration-none" th:text="${#strings.substring(log.reportId, 0, 8)} + '...'">ID</a>
+                                </td>
+                                <td class="px-4 py-3 small fw-medium">
+                                    <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>
+                                    <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                                    <span class="text-primary" th:text="${log.newStatus}">NEW</span>
+                                </td>
+                                <td class="px-4 py-3 text-muted small" th:text="${log.notes ?: '-'}">Catatan</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(logs)}">
+                                <td colspan="5" class="text-center py-4 text-muted">Belum ada riwayat aktivitas.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/script.js"></script>
+</body>
+</html>

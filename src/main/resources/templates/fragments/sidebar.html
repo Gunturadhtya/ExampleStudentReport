@@ -22,7 +22,7 @@
             <span>Feed Laporan</span>
         </a>
 
-        <a th:if="${!isAdmin}" href="/buat-laporan" class="nav-link-custom d-flex align-items-center gap-3 py-3 px-3 rounded text-decoration-none fw-semibold"
+        <a th:if="${!isAdmin}" th:href="@{/buat-laporan}" class="nav-link-custom d-flex align-items-center gap-3 py-3 px-3 rounded text-decoration-none fw-semibold"
         th:classappend="${activePage == 'buatLaporan'} ? 'active' : 'text-secondary'">
             <i class="bi bi-plus-circle" style="font-size: 1.15rem;"></i>
             <span>Buat Laporan</span>
@@ -38,6 +38,12 @@
            th:classappend="${activePage == 'users'} ? 'active' : 'text-secondary'">
             <i class="bi bi-people" style="font-size: 1.15rem;"></i>
             <span>Manajemen Pengguna</span>
+        </a>
+
+        <a th:if="${isAdmin}" th:href="@{/admin/report-logs}" class="nav-link-custom d-flex align-items-center gap-3 py-3 px-3 rounded text-decoration-none fw-semibold"
+           th:classappend="${activePage == 'auditLogs'} ? 'active' : 'text-secondary'">
+            <i class="bi bi-clock-history" style="font-size: 1.15rem;"></i>
+            <span>Log Aktivitas</span>
         </a>
     </div>
 
