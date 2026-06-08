@@ -8,7 +8,7 @@
                     <h1 class="modal-title h5 fw-bold text-dark">Tambah Ruangan Baru</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/rooms" method="post">
+                <form id="formAddRoom">
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Gedung</label>
@@ -46,7 +46,7 @@
                     <h1 class="modal-title h5 fw-bold text-dark">Edit Ruangan</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/rooms/update" method="post">
+                <form id="formEditRoom">
                     <input type="hidden" id="editRoomId" name="roomId">
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
@@ -85,7 +85,7 @@
                     <h1 class="modal-title h5 fw-bold text-danger">Konfirmasi Hapus</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/rooms/delete" method="post">
+                <form id="formDeleteRoom">
                     <input type="hidden" id="deleteRoomId" name="id">
                     <div class="modal-body px-4 py-3">
                         <p class="text-dark mb-0">Apakah Anda yakin ingin menghapus ruangan <span id="deleteRoomNameDisplay" class="fw-semibold"></span>?</p>
