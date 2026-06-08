@@ -1,12 +1,30 @@
 
 # Student Report
 
-A brief description of what this project does and who it's for
+Sistem Pelaporan Kerusakan Fasilitas Kampus terintegrasi yang dirancang untuk memudahkan mahasiswa dalam melaporkan masalah fasilitas (seperti kerusakan AC, proyektor, kelistrikan, dll), serta memudahkan pihak administrator/teknisi untuk melacak dan mengelola perbaikan.
+
+Sistem ini menggunakan arsitektur *API-driven* di mana *frontend* (Thymeleaf + Vanilla JS) berkomunikasi langsung dengan REST API *backend* (Spring Boot) secara *asynchronous*.
+
+## Fitur Utama
+
+### Mahasiswa (User)
+* **Manajemen Akun:** Registrasi, Login, dan manajemen data akademik mahasiswa.
+* **Dashboard Personal:** Melacak statistik laporan pribadi (Total, Diproses, Selesai).
+* **Pembuatan Laporan:** Membuat laporan kerusakan yang dilengkapi dengan fitur *upload* foto maksimal 3 gambar (terintegrasi dengan MinIO).
+* **Feed Laporan (Infinite Scroll):** Melihat laporan dari seluruh mahasiswa dengan fitur *infinite scrolling* dan filter pencarian.
+* **Upvote System:** Memberikan dukungan (*upvote*) pada laporan mahasiswa lain agar menjadi prioritas.
+
+### Administrator
+* **Dashboard Admin:** *Overview* status seluruh laporan masuk (*Pending, In Progress, Completed*).
+* **Manajemen Status Laporan:** Memperbarui status penanganan laporan beserta catatan teknis.
+* **Master Data Management:** Operasi CRUD (Create, Read, Update, Delete) untuk referensi data:
+  * Kategori Laporan (Infrastruktur, Kelistrikan, dll)
+  * Gedung & Ruangan
+* **Report Audit Log:** Melacak riwayat perubahan status pada setiap laporan.
 
 ## Tech Stack
 
 ### Backend
-
 * **Language:** Kotlin, Java 17
 * **Framework:** Spring Boot
 * **Security:** Spring Security (Custom Session-based Token Authentication)
@@ -14,33 +32,27 @@ A brief description of what this project does and who it's for
 * **Database Migration:** Flyway
 * **Relational Database:** PostgreSQL
 * **Object Storage:** MinIO (S3-compatible storage for image uploads)
+
+### Frontend
 * **Template Engine:** Thymeleaf
 * **Styling:** Bootstrap 5.3.8, Custom CSS
 * **Icons:** Bootstrap Icons
-* **Scripting:** Vanilla JavaScript (DOM manipulation, Fetch API)
+* **Scripting:** Vanilla JavaScript (DOM manipulation, Fetch API, FormData)
+
+### Infrastructure & Tools
 * **Build Tool:** Gradle (Kotlin DSL)
 * **Containerization:** Docker, Docker Compose
 * **API Documentation:** OpenAPI 3.0 (YAML specification included)
-## Features
-
-- Live previews
-- Fullscreen mode
-- Cross platform
-
-
-## Demo
-
-Insert gif or link to demo
 
 ## Color Reference
 
 | Color             | Hex                                                                |
 | ----------------- | ------------------------------------------------------------------ |
-| Example Color | ![#0a192f](https://dummyimage.com/10/0a192f/white?text=+) #0a192f |
-| Example Color | ![#f8f8f8](https://dummyimage.com/10/f8f8f8/white?text=+) #f8f8f8 |
-| Example Color | ![#00b48a](https://dummyimage.com/10/00b48a/white?text=+) #00b48a |
-| Example Color | ![#00d1a0](https://dummyimage.com/10/00d1a0/white?text=+)) #00d1a0 |
-
+| **Main Background** (Login, Main Content) | ![#d4ebf8](https://dummyimage.com/10/d4ebf8/white?text=+) `#d4ebf8` |
+| **Primary Button** (Tombol Submit) | ![#bde0fe](https://dummyimage.com/10/bde0fe/white?text=+) `#bde0fe` |
+| **Button Border** (Garis Tombol) | ![#a2d2ff](https://dummyimage.com/10/a2d2ff/white?text=+) `#a2d2ff` |
+| **Dark Text** (Teks Utama, Heading) | ![#0f172a](https://dummyimage.com/10/0f172a/white?text=+) `#0f172a` |
+| **Secondary Accent** (Ikon, Placeholder) | ![#64748b](https://dummyimage.com/10/64748b/white?text=+) `#64748b` |
 ## API Reference
 
 **Base URL:** `/api/v1`
