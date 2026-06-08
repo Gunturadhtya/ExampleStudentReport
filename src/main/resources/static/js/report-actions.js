@@ -141,14 +141,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 };
 
                 const response = await apiClient.put(`/api/v1/reports/${reportId}`, payload);
-                if (response.ok) {
-                    window.location.reload();
-                } else {
+                if (!response.ok) {
                     const result = await response.json();
-                    throw new Error(result.message);
+                    throw new Error(result.message || "Gagal menyimpan teks laporan");
                 }
+
+                const fileInput = document.getElementById('editReportImages');
+                if (fileInput && fileInput.files.length > 0) {
+                    const imgFormData = new FormData();
+                    Array.from(fileInput.files).forEach(file => {
+                        imgFormData.append('images', file);
+                    });
+
+                    const imgResponse = await apiClient.post(`/api/v1/reports/${reportId}/images`, imgFormData);
+                    if (!imgResponse.ok) {
+                        const imgResult = await imgResponse.json();
+                        throw new Error("Teks tersimpan, tapi gagal upload foto: " + (imgResult.message || "Unknown error"));
+                    }
+                }
+
+                window.location.reload();
+
             } catch (e) {
-                alert("Gagal mengupdate laporan: " + e.message);
+                alert(e.message);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
