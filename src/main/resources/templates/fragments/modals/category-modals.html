@@ -8,7 +8,7 @@
                     <h1 class="modal-title h5 fw-bold text-dark">Tambah Kategori Baru</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/categories" method="post">
+                <form id="formAddCategory">
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Kategori</label>
@@ -35,7 +35,7 @@
                     <h1 class="modal-title h5 fw-bold text-dark">Edit Kategori</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/categories/update" method="post">
+                <form id="formEditCategory">
                     <input type="hidden" id="editCategoryId" name="id">
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
@@ -63,7 +63,7 @@
                     <h1 class="modal-title h5 fw-bold text-danger">Konfirmasi Hapus</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/master-data/categories/delete" method="post">
+                <form id="formDeleteCategory">
                     <input type="hidden" id="deleteCategoryId" name="id">
                     <div class="modal-body px-4 py-3">
                         <p class="text-dark mb-0">Apakah Anda yakin ingin menghapus kategori <span id="deleteCategoryNameDisplay" class="fw-semibold"></span>?</p>
