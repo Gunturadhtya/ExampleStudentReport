@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             } else {
                 icon.classList.remove('d-none');
-                h5Text.textContent = 'Klik untuk unggah';
+                h5Text.textContent = 'Klik untuk unggah file';
                 h5Text.className = 'h6 fw-bold mb-1';
                 pText.textContent = 'PNG, JPG, dan WEBP. Maks 3 foto (Max 5MB/file)';
             }
