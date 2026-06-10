@@ -14,7 +14,7 @@ Sistem ini menggunakan arsitektur *API-driven* di mana *frontend* (Thymeleaf + V
 ## Fitur Utama
 
 ### Mahasiswa (User)
-* **Manajemen Akun:** Registrasi, Login, dan manajemen data akademik mahasiswa.
+* **Manajemen Akun:** Registrasi, Login, dan manajemen data mahasiswa.
 * **Dashboard Personal:** Melacak statistik laporan pribadi (Total, Diproses, Selesai).
 * **Pembuatan Laporan:** Membuat laporan kerusakan yang dilengkapi dengan fitur *upload* foto maksimal 3 gambar (terintegrasi dengan MinIO).
 * **Feed Laporan (Infinite Scroll):** Melihat laporan dari seluruh mahasiswa dengan fitur *infinite scrolling* dan filter pencarian.
@@ -25,7 +25,8 @@ Sistem ini menggunakan arsitektur *API-driven* di mana *frontend* (Thymeleaf + V
 * **Manajemen Status Laporan:** Memperbarui status penanganan laporan beserta catatan teknis.
 * **Master Data Management:** Operasi CRUD (Create, Read, Update, Delete) untuk referensi data:
   * Kategori Laporan (Infrastruktur, Kelistrikan, dll)
-  * Gedung & Ruangan
+  * Gedung
+  * Ruangan
 * **Report Audit Log:** Melacak riwayat perubahan status pada setiap laporan.
 
 ## Tech Stack
