@@ -50,6 +50,10 @@ Sistem ini menggunakan arsitektur *API-driven* di mana *frontend* (Thymeleaf + V
 * **Containerization:** Docker, Docker Compose
 * **API Documentation:** OpenAPI 3.0 (YAML specification included)
 
+## Design Reference
+
+* **Figma Design:** [Klik di sini untuk melihat desain UI/UX (Figma)](https://www.figma.com/design/yBEqHmf9p8jaXGWLfMEg0f/student-report?node-id=0-1&t=MkquXDh7Ek5sBwAu-1)
+
 ## Color Reference
 
 | Color             | Hex                                                                |
