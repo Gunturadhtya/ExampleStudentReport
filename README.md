@@ -5,6 +5,12 @@ Sistem Pelaporan Kerusakan Fasilitas Kampus terintegrasi yang dirancang untuk me
 
 Sistem ini menggunakan arsitektur *API-driven* di mana *frontend* (Thymeleaf + Vanilla JS) berkomunikasi langsung dengan REST API *backend* (Spring Boot) secara *asynchronous*.
 
+## Tim Pengembang
+
+* **Muhammad Guntur Ricky Adhitya** – API, Database, Service, Middleware, Auth, Docker
+* **Noor Khalisa** – UI Implementation dengan Bootstrap, Frontend Logic (JavaScript), Thymeleaf, API Integration
+* **Nazla Salsabila** – Model, UI/UX
+
 ## Fitur Utama
 
 ### Mahasiswa (User)
